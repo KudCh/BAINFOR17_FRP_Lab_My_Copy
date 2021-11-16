@@ -1,4 +1,4 @@
-# BAINFOR17_Project_template
+# FRP_Lab_template
 Reactive Programming project for BAINFOR17.
 
 ## Structure
