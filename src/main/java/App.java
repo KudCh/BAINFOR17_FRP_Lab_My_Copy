@@ -19,10 +19,11 @@ public class App extends Application {
 
         /* Observable sources from the backend */
         Observable<Integer> oddTicks = Observable
-                .interval(3, TimeUnit.SECONDS)
-                .map(Long::intValue)
-                .filter(v -> v % 2 != 0);
+                .interval(3, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
+                .map(Long::intValue) // Converts to int
+                .filter(v -> v % 2 != 0); // Filters out even numbers 
 
+        // Gets a different name every 2 seconds
         final String[] names = {"Alice", "Bob", "Pierre", "Gabriel", "Manuel"};
         Observable<String> nameObservable = Observable
                 .interval(2, TimeUnit.SECONDS)
@@ -30,11 +31,11 @@ public class App extends Application {
                 .map(i -> names[i % names.length]);
 
 
-        // Combines two observable
+        // Combines two observables
         Observable<String> nameWithTick = Observable
                 .combineLatest(oddTicks, nameObservable, (currentTick, currentName) -> currentName + currentTick);
 
-        // Fixed labels
+        // Static labels
         Label plus = new Label(" + ");
         Label equals = new Label(" = ");
 
@@ -56,6 +57,7 @@ public class App extends Application {
                 .subscribe(nameWithTickLabel::setText);
 
         /* Observable sources from the front end */
+        // Getting number of clicks on a button
         Button button = new Button("Click");
 
         Observable<Integer> clicks = JavaFxObservable.actionEventsOf(button)
