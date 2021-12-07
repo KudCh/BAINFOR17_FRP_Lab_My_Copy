@@ -1,0 +1,74 @@
+Index: target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>C:\\Users\\Alex\\Documents\\UNI IMPORTANT\\PF3\\BAINFOR17_FRP_Lab_My_Copy\\src\\main\\java\\App.java\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst b/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+--- a/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst	(revision 5a1b0b2ddc75e83c7f3a4629b881d507521c3138)
++++ b/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst	(date 1638896506499)
+@@ -1,1 +1,1 @@
+-C:\Users\Alex\Documents\UNI IMPORTANT\PF3\BAINFOR17_FRP_Lab_My_Copy\src\main\java\App.java
++C:\Users\Christina\Desktop\Uni materials\Courses\Semester 3\Programming Fundumentals\BAINFOR17_FRP_Lab_My_Copy\src\main\java\App.java
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"CompilerConfiguration\">\r\n    <annotationProcessing>\r\n      <profile name=\"Maven default annotation processors profile\" enabled=\"true\">\r\n        <sourceOutputDir name=\"target/generated-sources/annotations\" />\r\n        <sourceTestOutputDir name=\"target/generated-test-sources/test-annotations\" />\r\n        <outputRelativeToContentRoot value=\"true\" />\r\n        <module name=\"Project_template\" />\r\n      </profile>\r\n    </annotationProcessing>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+--- a/.idea/compiler.xml	(revision 5a1b0b2ddc75e83c7f3a4629b881d507521c3138)
++++ b/.idea/compiler.xml	(date 1638903681361)
+@@ -7,6 +7,7 @@
+         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+         <outputRelativeToContentRoot value="true" />
+         <module name="Project_template" />
++        <module name="BAINFOR17_FRP_Lab_My_Copy" />
+       </profile>
+     </annotationProcessing>
+   </component>
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\r\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n\r\n    <groupId>lu.uni.bainfor17</groupId>\r\n    <artifactId>Project_template</artifactId>\r\n    <version>1.0-SNAPSHOT</version>\r\n\r\n    <properties>\r\n        <maven.compiler.source>16</maven.compiler.source>\r\n        <maven.compiler.target>16</maven.compiler.target>\r\n        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\r\n        <javafx.version>17.0.0.1</javafx.version>\r\n        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>\r\n        <rxjava.version>3.1.2</rxjava.version>\r\n        <rxjavafx.version>3.0.2</rxjavafx.version>\r\n    </properties>\r\n\r\n    <build>\r\n        <plugins>\r\n            <plugin>\r\n                <groupId>org.openjfx</groupId>\r\n                <artifactId>javafx-maven-plugin</artifactId>\r\n                <version>${javafx.maven.plugin.version}</version>\r\n                <configuration>\r\n                    <mainClass>App</mainClass>\r\n                </configuration>\r\n            </plugin>\r\n        </plugins>\r\n    </build>\r\n\r\n    <dependencies>\r\n        <dependency>\r\n            <groupId>io.reactivex.rxjava3</groupId>\r\n            <artifactId>rxjava</artifactId>\r\n            <version>${rxjava.version}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.openjfx</groupId>\r\n            <artifactId>javafx-controls</artifactId>\r\n            <version>${javafx.version}</version>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.pdfsam.rxjava3</groupId>\r\n            <artifactId>rxjavafx</artifactId>\r\n            <version>${rxjavafx.version}</version>\r\n        </dependency>\r\n\r\n    </dependencies>\r\n\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/pom.xml b/pom.xml
+--- a/pom.xml	(revision 5a1b0b2ddc75e83c7f3a4629b881d507521c3138)
++++ b/pom.xml	(date 1638902827823)
+@@ -28,6 +28,14 @@
+                     <mainClass>App</mainClass>
+                 </configuration>
+             </plugin>
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-compiler-plugin</artifactId>
++                <configuration>
++                    <source>15</source>
++                    <target>15</target>
++                </configuration>
++            </plugin>
+         </plugins>
+     </build>
+ 
+Index: .idea/encodings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"Encoding\">\r\n    <file url=\"file://$PROJECT_DIR$/src/main/java\" charset=\"UTF-8\" />\r\n    <file url=\"file://$PROJECT_DIR$/src/main/resources\" charset=\"UTF-8\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/encodings.xml b/.idea/encodings.xml
+--- a/.idea/encodings.xml	(revision 5a1b0b2ddc75e83c7f3a4629b881d507521c3138)
++++ b/.idea/encodings.xml	(date 1638896469670)
+@@ -2,6 +2,5 @@
+ <project version="4">
+   <component name="Encoding">
+     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+-    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+   </component>
+ </project>
+\ No newline at end of file
