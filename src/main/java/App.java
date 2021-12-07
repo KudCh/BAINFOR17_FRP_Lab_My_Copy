@@ -30,6 +30,13 @@ public class App extends Application {
                 .map(Long::intValue)
                 .map(i -> names[i % names.length]);
 
+        /* Observable sources from the backend */
+        final String[] weather = {"CLOUDY", "SUNNY"};
+        Observable<String> weatherObservable = Observable
+                .interval(5, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
+                .map(Long::intValue) // Converts to int
+                .map(i -> weather[i % 2]);
+
 
         // Combines two observables
         Observable<String> nameWithTick = Observable
@@ -44,11 +51,15 @@ public class App extends Application {
         Label nameLabel = new Label();
         Label tickLabel = new Label();
         Label nameWithTickLabel = new Label();
+        Label weatherLabel = new Label();
 
         // Observing observables values and reacting to new values by updating the UI components
         nameObservable
                 .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
                 .subscribe(nameLabel::setText);
+        weatherObservable
+                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
+                .subscribe(weatherNow -> weatherLabel.setText("\tToday the weather is " + weatherNow));
         oddTicks
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(currentTick -> tickLabel.setText(currentTick.toString()));
@@ -74,7 +85,8 @@ public class App extends Application {
         VBox container = new VBox();
         HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel);
         HBox clicksBox = new HBox(button, clicksLabel);
-        container.getChildren().addAll(nameWithTickBox, clicksBox);
+        HBox weatherBox = new HBox(weatherLabel);
+        container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox);
 
         Scene scene = new Scene(container, 640, 480);
         stage.setScene(scene);
