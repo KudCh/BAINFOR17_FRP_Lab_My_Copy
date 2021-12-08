@@ -43,10 +43,20 @@ public class App extends Application {
                 .map(Long::intValue) // Converts to int
                 .map(i -> weather[i % 2]);
 
+        /* Observable sources from the backend */
+        final int[] degrees = {15, 20, 25};
+        Observable<Integer> degreesObservable = Observable
+                .interval(5, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
+                .map(Long::intValue) // Converts to int
+                .map(i -> degrees[i % 3]);
+
 
         // Combines two observables
         Observable<String> nameWithTick = Observable
                 .combineLatest(oddTicks, nameObservable, (currentTick, currentName) -> currentName + currentTick);
+
+        Observable<String> weatherWithDegrees = Observable
+                .combineLatest(weatherObservable, degreesObservable, (currentWeather, currentDegrees) -> "The weather now is: " + currentWeather + "; " + currentDegrees.toString() + "degrees");
 
         // Static labels
         Label plus = new Label(" + ");
@@ -62,26 +72,32 @@ public class App extends Application {
         ImageView imageView = new ImageView();
         //String imageName = new String();
         Label imageName = new Label();
+        Label weatherWithDegreesLabel = new Label();
 
 
         // Observing observables values and reacting to new values by updating the UI components
         nameObservable
                 .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
                 .subscribe(nameLabel::setText);
-        weatherObservable
-                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(weatherNow -> weatherLabel.setText("\tNow the weather is " + weatherNow));
+        weatherWithDegrees
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(weatherWithDegreesLabel::setText);
+      //  weatherObservable
+      //          .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
+      //          .subscribe(weatherNow -> weatherLabel.setText("\tNow the weather is " + weatherNow));
         weatherObservable
                 .map(string -> string.toLowerCase() +".png")
                 .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(name -> {
+               // .subscribe(imageName::setText);
+                .subscribe(name -> { imageName.setText(name);
                     try {FileInputStream input = new FileInputStream(imageName.getText());
-                        Image png = new Image(input);
+                        Image png = new Image(input, 100, 100, false, false);
                         imageView.setImage(png);
                     } catch (FileNotFoundException ex) {
                         ex.printStackTrace();
                     }
                 });
+
 
         oddTicks
                 .observeOn(JavaFxScheduler.platform())
@@ -98,24 +114,32 @@ public class App extends Application {
 
         /* Observable sources from the front end */
         // Getting number of clicks on a button
-        Button button = new Button("Click");
+        Button button = new Button("C° / F°");
 
-        Observable<Integer> clicks = JavaFxObservable.actionEventsOf(button)
+        Label degreeType = new Label("C");
+        String cel = new String("");
+        Observable<String> clickDegrees = JavaFxObservable.actionEventsOf(button)
                 .subscribeOn(Schedulers.computation()) // Switching thread
-                .map(ae -> 1)
-                .scan(0, (acc, newClick) -> acc + newClick);
+                .map(ae -> {
+                    cel = degreeType.getText();
+                    if (cel.equals("C")){ae::"F"} else {ae::"C";}
+                });
+               // .scan(0, (acc, newClick) -> acc + newClick);
 
-        Label clicksLabel = new Label();
-        clicks
+        Label degreeTypeLabel = new Label();
+        clickDegrees
                 .observeOn(JavaFxScheduler.platform())
-                .subscribe(clickNumber -> clicksLabel.setText("\tYou clicked " + clickNumber + " times"));
+                .subscribe(clickDegreeType -> degreeTypeLabel.setText(clickDegrees));
 
         // Assemble full view
         VBox container = new VBox();
         container.setStyle("-fx-border-width: 16;");
         HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel);
         HBox clicksBox = new HBox(button, clicksLabel);
-        HBox weatherBox = new HBox(weatherLabel, imageView);
+
+        HBox weatherBox = new HBox(weatherWithDegreesLabel, degreeTypeLabel);
+        VBox weatherImageBox = new VBox(weatherBox, imageView);
+
         container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox);
 
         Scene scene = new Scene(container, 640, 480);
