@@ -2,194 +2,274 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.application.Application;
 import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
-import javafx.stage.Modality;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
+import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
+import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class App extends Application {
     @Override
     public void start(Stage stage) {
+        /* Observable gives the current time every 200 ms */
+        stage.setTitle("Team Abandoned Dashboard");
+        stage.setMaximized(true);
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
         Observable<Long> digitalClock = Observable.interval(200,TimeUnit.MILLISECONDS);
+        /* Observable gives the current day every minute */
+        Observable<Long> digitalDate = Observable.interval(1,TimeUnit.MINUTES);
         Label digitalClockLabel = new Label();
-        digitalClockLabel.setTextFill(Color.BLUEVIOLET);
+        Label digitalDateLabel = new Label();
+        digitalDateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        digitalClockLabel.setTextFill(Color.rgb(166,50,248));
+        digitalDateLabel.setTextFill(Color.rgb(166,50,150));
         digitalClock
                 .observeOn(JavaFxScheduler.platform())
-                .subscribe(currentTime -> digitalClockLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
-        VBox container = new VBox();
-        HBox clock = new HBox(digitalClockLabel);
-        clock.setBackground(new Background(new BackgroundFill(Color.GREENYELLOW,CornerRadii.EMPTY, Insets.EMPTY)));
-        clock.setMaxWidth(125);
-        clock.prefHeight(10);
+                .subscribe(e -> digitalClockLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
+        digitalDate
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(e -> digitalDateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
 
-        Rectangle rec1 = new Rectangle(5, 5, 100, 80);
-        rec1.setFill(Color.RED);
-        rec1.setStroke(Color.GREEN);
-        rec1.setStrokeWidth(3);
-        rec1.onMouseClickedProperty().set((e) -> {
-            System.out.println("Clicked rec1!");
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        final String[] weather = {"CLOUDY", "SUNNY"};
+        Observable<String> weatherObservable = Observable
+                .interval(5, TimeUnit.SECONDS)
+                .map(Long::intValue) // Converts to int
+                .map(i -> weather[i % 2]);
+
+        Observable<String> weatherImageObservable = Observable
+                .interval(5, TimeUnit.SECONDS)
+                .map(Long::intValue) // Converts to int
+                .map(i -> weather[i%2])
+                .map(name -> "weatherIcons/"+(name.toLowerCase())+ ".png");
+
+        Label weatherLabel = new Label();
+        ImageView imageView = new ImageView();
+
+        weatherObservable
+                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
+                .subscribe(weatherNow -> weatherLabel.setText("\tNow the weather is " + weatherNow));
+        weatherImageObservable
+                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
+                .subscribe(imgName -> {
+                    System.out.println(imgName);
+                    FileInputStream input = new FileInputStream(imgName);
+                    Image img = new Image(input);
+                    imageView.setImage(img);
+                    imageView.setFitHeight(50);
+                    imageView.setFitWidth(50);
+                });
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        /* Observable sources from the backend */
+        Observable<Integer> oddTicks = Observable
+                .interval(3, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
+                .map(Long::intValue) // Converts to int
+                .filter(v -> v % 2 != 0); // Filters out even numbers
+
+        // Gets a different name every 2 seconds
+        final String[] names = {"Alice", "Bob", "Pierre", "Gabriel", "Manuel"};
+        Observable<String> nameObservable = Observable
+                .interval(2, TimeUnit.SECONDS)
+                .map(Long::intValue)
+                .map(i -> names[i % names.length]);
+
+        // Combines two observables
+        Observable<String> nameWithTick = Observable
+                .combineLatest(oddTicks, nameObservable, (currentTick, currentName) -> currentName + currentTick);
+
+        // Static labels
+        Label plus = new Label(" + ");
+        Label equals = new Label(" = ");
+        // Displaying changing data in the UI
+        Label nameLabel = new Label();
+        Label tickLabel = new Label();
+        Label nameWithTickLabel = new Label();
+
+        // Observing observables values and reacting to new values by updating the UI components
+        nameObservable
+                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
+                .subscribe(nameLabel::setText);
+        oddTicks
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(currentTick -> tickLabel.setText(currentTick.toString()));
+        nameWithTick
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(nameWithTickLabel::setText);
+
+        /* Observable sources from the front end */
+        // Getting number of clicks on a button
+        Button button = new Button("Click");
+
+        Observable<Integer> clicks = JavaFxObservable.actionEventsOf(button)
+                .subscribeOn(Schedulers.computation()) // Switching thread
+                .map(ae -> 1)
+                .scan(0, (acc, newClick) -> acc + newClick);
+
+        Label clicksLabel = new Label();
+        clicks
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(clickNumber -> clicksLabel.setText("\tYou clicked " + clickNumber + " times"));
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        ProgressBar fillBarBar = new ProgressBar(0);
+        Button fillBarButton = new Button("Click fast to fill bar!");
+        AtomicReference<Float> progressFloat = new AtomicReference<>(0.0F);
+        AtomicReference<Integer> clickCounter = new AtomicReference<>(0);
+        Rectangle myRectangle = new Rectangle(50,50);
+        myRectangle.setFill(Color.RED);
+        Label myRectangleLabel = new Label();
+
+        Observable<Float> fillBarButtonClick = JavaFxObservable.actionEventsOf(fillBarButton)
+                .subscribeOn(Schedulers.computation())
+                .map(ae -> 0.05F)
+                .map(increase -> {
+                    clickCounter.updateAndGet(i -> i + 1);
+                    Float currentProgress = progressFloat.get();
+                    if (currentProgress+increase >= 1.0F) {
+                        progressFloat.set(1.0F);
+                    } else {
+                        progressFloat.set(currentProgress+increase);
+                    }
+                    return (progressFloat.get());
+                });
+        Observable<Float> fillBarDecay = Observable
+                .interval(250,TimeUnit.MILLISECONDS)
+                .map(decay -> 0.02F)
+                .map(decrease -> {
+                    Float currentProgress = progressFloat.get();
+//                    System.out.println(currentProgress);
+                    if (currentProgress-decrease <= 0) {
+                        progressFloat.set(0.0F);
+                    }else {
+                        progressFloat.set(currentProgress-decrease);
+                    }
+                    return  progressFloat.get();
+                });
+        Label fillBarLabel = new Label();
+        fillBarButtonClick
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(currentProgress -> {
+                    fillBarBar.setProgress(currentProgress);
+                    if (progressFloat.get() == 1.0F) {
+                        myRectangle.setFill(Color.GREEN);
+                        myRectangleLabel.setText("You win! It took: "+clickCounter.get()+" clicks!");
+                    }
+                });
+        fillBarDecay
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(decay -> {
+                    fillBarBar.setProgress(decay);
+                    if (progressFloat.get() == 0.0F) {
+                        myRectangle.setFill(Color.RED);
+                        myRectangleLabel.setText("Try again?");
+                        clickCounter.set(0);
+                    }
+                });
+        myRectangle.onMouseClickedProperty().set(e -> {
+            myRectangle.setFill(Color.RED);
+            progressFloat.set(0.0F);
+            clickCounter.set(0);
         });
 
-        Text someText = new Text("Hello world!");
-        Pane pane = new Pane();
-        pane.autosize();
-        pane.setStyle("-fx-background-color: #571313");
-        Rectangle rec2 = new Rectangle(100.0d, 100.0d, 80, 100);
-        rec2.setFill(Color.rgb(91, 127, 255));
-        rec2.setStroke(Color.hsb(40, 0.7, 0.8));
-        rec2.setStrokeWidth(3);
-        rec2.onMouseEnteredProperty().set((e) -> {
-            System.out.println("Mouse over rec2!");
-        });
-        pane.getChildren().addAll(rec1,rec2,someText);
-        Group group = new Group(rec1,rec2);
+        /* ------------------------------------------------------------------------------------------------------ */
 
+        // Assemble full view
+        VBox container = new VBox(new Label("Container"));
+        container.setStyle("-fx-background-color:#6e6969;");
+        container.setSpacing(5);
 
+        /* ------------------------------------------------------------------------------------------------------ */
 
-        VBox container2 = new VBox();
-        Scene scene2 = new Scene(container2,800,800);
-        Button b1 = new Button();
-        b1.setOnAction(e -> stage.setScene(scene2));
-        container.getChildren().addAll(clock,group,pane,b1);
-        Scene scene = new Scene(container,1080,540);
-        Button b2 = new Button();
-        b2.setOnAction(e -> stage.setScene(scene));
+        HBox clockHBox = new HBox(new Label("Date & Digital clock"),digitalDateLabel, digitalClockLabel);
+        clockHBox.setTranslateX(10);
+        clockHBox.setSpacing(20);
+        clockHBox.setMaxWidth(420);
+        clockHBox.setPadding(new Insets(20));
+        clockHBox.setStyle("-fx-background-color:#ffffff;");
+        clockHBox.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.BLACK,
+                                new BorderStrokeStyle(
+                                        StrokeType.INSIDE,
+                                        StrokeLineJoin.MITER,
+                                        StrokeLineCap.BUTT,
+                                        10,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(0),
+                                new BorderWidths(8)
+                        )
+                )
+        );
 
-        container2.getChildren().add(b2);
+        /* ------------------------------------------------------------------------------------------------------ */
 
+        HBox weatherBox = new HBox(new Label("Weather Box"),weatherLabel, imageView);
+        weatherBox.setTranslateX(10);
+        weatherBox.setSpacing(20);
+        weatherBox.setMaxWidth(420);
+        weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
+        weatherBox.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.BLACK,
+                                new BorderStrokeStyle(
+                                        StrokeType.INSIDE,
+                                        StrokeLineJoin.MITER,
+                                        StrokeLineCap.BUTT,
+                                        5,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(10),
+                                new BorderWidths(2)
+                        )
+                )
+        );
 
+        /* ------------------------------------------------------------------------------------------------------ */
 
+        HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel);
 
-        stage.setTitle("Amazing dashboard!");
-//        stage.initStyle(StageStyle.DECORATED);
+        /* ------------------------------------------------------------------------------------------------------ */
 
-//        scene.setFill(new LinearGradient(0,0,1,1,true,
-//                CycleMethod.NO_CYCLE,
-//                new Stop(0, Color.web("blue")),
-//                new Stop(1, Color.web("purple"))
-//        ));
-        stage.setMaximized(true);
+        HBox clicksBox = new HBox(button, clicksLabel);
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        HBox fillBarGame = new HBox(new Label("Fill the Bar game!"), fillBarBar, fillBarButton, fillBarLabel,myRectangle,myRectangleLabel);
+        fillBarGame.setSpacing(10);
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        container.getChildren().addAll(clockHBox, weatherBox, nameWithTickBox, clicksBox, fillBarGame);
+        Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
-
-//        container2.getChildren().addAll(b1);
-//        myStage.setScene(scene2);
-//        myStage.showAndWait();
-//        Stage myStage = new Stage();
-////        Label aLabel = new Label("A test label");
-////        Scene aScene = new Scene(aLabel,200,100);
-////        stage.setScene(aScene);
-////        stage.setHeight(500);
-//        myStage.initModality(Modality.APPLICATION_MODAL); //block
-////        stage.initStyle(StageStyle.DECORATED);
-//        stage.setScene(scene); // only one scene per stage at one time
-//        scene.setCursor(Cursor.OPEN_HAND); //cursor changes
-//        VBox vBox2 = new VBox();
-//        Scene secondScene = new Scene(vBox2);
-//        myStage.setScene(secondScene);
-//        myStage.showAndWait();
-
-//        Observable<Long> myTime = Observable
-//                .interval(1, TimeUnit.SECONDS);
-//        /* Observable sources from the backend */
-//        Observable<Integer> oddTicks = Observable
-//                .interval(1, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
-//                .map(Long::intValue) // Converts to int
-//                .filter(v -> v % 2 != 0 || v % 2 == 0); // Filters out even numbers
-//        // Gets a different name every 2 seconds
-//        final String[] names = {"Alice", "Bob", "Pierre", "Gabriel", "Manuel"};
-//        Observable<String> nameObservable = Observable
-//                .interval(1, TimeUnit.SECONDS)
-//                .map(Long::intValue)
-//                .map(i -> names[i % names.length]);
-//        // Combines two observables
-//        Observable<String> nameWithTick = Observable
-//                .combineLatest(oddTicks, nameObservable, (currentTick, currentName) -> currentName + currentTick);
-//        // Static labels
-//        Label plus = new Label(" + ");
-//        Label equals = new Label(" = ");
-//        // Displaying changing data in the UI
-//        Label nameLabel = new Label();
-//        Label tickLabel = new Label();
-//        Label nameWithTickLabel = new Label();
-//        Label timeLabel = new Label();
-//        // Observing observables values and reacting to new values by updating the UI components
-//        nameObservable
-//                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-//                .subscribe(nameLabel::setText);
-//        oddTicks
-//                .observeOn(JavaFxScheduler.platform())
-//                .subscribe(currentTick -> tickLabel.setText(currentTick.toString()));
-//        nameWithTick
-//                .observeOn(JavaFxScheduler.platform())
-//                .subscribe(nameWithTickLabel::setText);
-//        /* Observable sources from the front end */
-//        // Getting number of clicks on a button
-//        Button button = new Button("Click");
-////        ToggleButton button = new ToggleButton("Toggle Button Click!");
-//
-//        Observable<Integer> clicks = JavaFxObservable.actionEventsOf(button)
-//                .subscribeOn(Schedulers.computation()) // Switching thread
-//                .map(ae -> 1)
-//                .scan(0, (acc, newClick) -> acc + newClick);
-//
-//        Label clicksLabel = new Label();
-//        clicks
-//                .observeOn(JavaFxScheduler.platform())
-//                .subscribe(clickNumber -> {
-//                    clicksLabel.setText("\tYou clicked " + clickNumber + " times");
-//                    System.out.println(stage.getOpacity());
-//                    Double newOpa = stage.getOpacity() - 0.05;
-//                    stage.setOpacity(newOpa);
-//                    boolean b = true;
-//                    stage.setFullScreen(b);
-//                });
-//        // Assemble full view
-//        VBox container = new VBox();
-//        HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel,timeLabel);
-//        HBox clicksBox = new HBox(button, clicksLabel);
-//        HBox timeBox = new HBox(timeLabel);
-//        container.getChildren().addAll(nameWithTickBox, clicksBox, timeBox);
-//        Scene scene = new Scene(container, 640, 480);
-//        stage.setScene(scene);
-//        stage.show();
-//
-//        /* Create welcome name */
-//        Text text1 = new Text("I am text ");
-//        text1.setStyle("-fx-font: normal bold 48px 'serif' ");
-//        text1.setStroke(Color.BLUEVIOLET);
-//        text1.setFill(Color.BLUEVIOLET);
-//
-//        HBox stringText = new HBox(text1);        // HBox creates row
-//        stringText.setAlignment(Pos.CENTER);
-//        stringText.setPrefHeight(75);
-//        container.getChildren().addAll(stringText);
-//
-//        FlowPane p = new FlowPane();
-//        Button b1 = new Button("B1");
-//        Button b2 = new Button("B2");
-//        Button b3 = new Button("B3");
-//        p.getChildren().add(b1);
-//        p.getChildren().add(b2);
-//        p.getChildren().add(b3);
-//        container.getChildren().addAll(p);
-    }
+}
     public static void main(String ... args) {
         launch();
     }
