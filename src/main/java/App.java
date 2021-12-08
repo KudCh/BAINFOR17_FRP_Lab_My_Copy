@@ -48,7 +48,8 @@ public class App extends Application {
 
         Text someText = new Text("Hello world!");
         Pane pane = new Pane();
-        pane.setStyle("-fx-background-color: #ff9f00");
+        pane.autosize();
+        pane.setStyle("-fx-background-color: #571313");
         Rectangle rec2 = new Rectangle(100.0d, 100.0d, 80, 100);
         rec2.setFill(Color.rgb(91, 127, 255));
         rec2.setStroke(Color.hsb(40, 0.7, 0.8));
@@ -59,17 +60,37 @@ public class App extends Application {
         pane.getChildren().addAll(rec1,rec2,someText);
         Group group = new Group(rec1,rec2);
 
-        container.getChildren().addAll(clock,group,pane);
+
+
+        VBox container2 = new VBox();
+        Scene scene2 = new Scene(container2,800,800);
+        Button b1 = new Button();
+        b1.setOnAction(e -> stage.setScene(scene2));
+        container.getChildren().addAll(clock,group,pane,b1);
+        Scene scene = new Scene(container,1080,540);
+        Button b2 = new Button();
+        b2.setOnAction(e -> stage.setScene(scene));
+
+        container2.getChildren().add(b2);
+
+
+
+
         stage.setTitle("Amazing dashboard!");
 //        stage.initStyle(StageStyle.DECORATED);
-        Scene scene = new Scene(container,1080,540);
+
 //        scene.setFill(new LinearGradient(0,0,1,1,true,
 //                CycleMethod.NO_CYCLE,
 //                new Stop(0, Color.web("blue")),
 //                new Stop(1, Color.web("purple"))
 //        ));
+        stage.setMaximized(true);
         stage.setScene(scene);
         stage.show();
+
+//        container2.getChildren().addAll(b1);
+//        myStage.setScene(scene2);
+//        myStage.showAndWait();
 //        Stage myStage = new Stage();
 ////        Label aLabel = new Label("A test label");
 ////        Scene aScene = new Scene(aLabel,200,100);
@@ -83,8 +104,6 @@ public class App extends Application {
 //        Scene secondScene = new Scene(vBox2);
 //        myStage.setScene(secondScene);
 //        myStage.showAndWait();
-////        nodes???
-////        fxml not importing???
 
 //        Observable<Long> myTime = Observable
 //                .interval(1, TimeUnit.SECONDS);
