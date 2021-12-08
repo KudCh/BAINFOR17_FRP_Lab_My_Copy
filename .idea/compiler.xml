@@ -6,11 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="BAINFOR17_FRP_Lab_My_Copy" />
+        <module name="Project_template" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="BAINFOR17_FRP_Lab_My_Copy" target="16" />
-    </bytecodeTargetLevel>
   </component>
 </project>

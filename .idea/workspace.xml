@@ -28,6 +28,14 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Christina\Desktop\Uni materials\Courses\Semester 3\Programming Fundumentals\BAINFOR17_FRP_Lab_My_Copy" />
+      <recent name="C:\Users\Christina\Desktop\Uni materials\Courses\Semester 3\Programming Fundumentals\BAINFOR17_FRP_Lab_My_Copy\src" />
+      <recent name="C:\Users\Christina\Desktop\Uni materials\Courses\Semester 3\Programming Fundumentals\BAINFOR17_FRP_Lab_My_Copy\src\main\java" />
+      <recent name="C:\Users\Christina\Desktop\Uni materials\Courses\Semester 3\Programming Fundumentals\BAINFOR17_FRP_Lab_My_Copy\src\main" />
+    </key>
+  </component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="mvn clean javafx:run" />
@@ -68,5 +76,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>
