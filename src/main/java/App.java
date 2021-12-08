@@ -59,7 +59,7 @@ public class App extends Application {
         Label nameWithTickLabel = new Label();
         Label weatherLabel = new Label();
         Image image;
-        ImageView imageView = null;
+        ImageView imageView = new ImageView();
         //String imageName = new String();
         Label imageName = new Label();
 
@@ -74,7 +74,14 @@ public class App extends Application {
         weatherObservable
                 .map(string -> string.toLowerCase() +".png")
                 .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(name -> imageName.setText());
+                .subscribe(name -> {
+                    try {FileInputStream input = new FileInputStream(imageName.getText());
+                        Image png = new Image(input);
+                        imageView.setImage(png);
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                });
 
         oddTicks
                 .observeOn(JavaFxScheduler.platform())
@@ -83,9 +90,7 @@ public class App extends Application {
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(nameWithTickLabel::setText);
 
-        FileInputStream input = new FileInputStream(imageName);
-        Image image = new Image(input);
-        ImageView imageView = new ImageView(image);
+
 //        String newName = new String(imageName.getText());
 
 
