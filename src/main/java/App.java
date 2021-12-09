@@ -28,7 +28,9 @@ public class App extends Application {
     public void start(Stage stage) {
         /* Observable gives the current time every 200 ms */
         stage.setTitle("Team Abandoned Dashboard");
-        stage.setMaximized(true);
+        stage.setWidth(1500);
+        stage.setHeight(750);
+//        stage.setMaximized(true);
 
         /* ------------------------------------------------------------------------------------------------------ */
 
@@ -55,6 +57,7 @@ public class App extends Application {
                 .map(Long::intValue) // Converts to int
                 .map(i -> weather[i % 2]);
 
+        //TODO: Subscribe for text and imageview to the same observable -> they are interlinked
         Observable<String> weatherImageObservable = Observable
                 .interval(5, TimeUnit.SECONDS)
                 .map(Long::intValue) // Converts to int
@@ -70,8 +73,8 @@ public class App extends Application {
         weatherImageObservable
                 .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
                 .subscribe(imgName -> {
-                    System.out.println(imgName);
-                    FileInputStream input = new FileInputStream(imgName);
+//                    System.out.println(imgName);
+                    FileInputStream input = new FileInputStream(imgName); //TODO: Try catch block -> if img cannot be found in folder
                     Image img = new Image(input);
                     imageView.setImage(img);
                     imageView.setFitHeight(50);
@@ -194,10 +197,18 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
+        /* Next feature: ... */
+        //TODO: Implement new feature
+
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
         // Assemble full view
         VBox container = new VBox(new Label("Container"));
         container.setStyle("-fx-background-color:#6e6969;");
         container.setSpacing(5);
+        container.setMaxWidth(stage.getMaxWidth()/2);
+        container.setMaxHeight(stage.getMaxHeight()/2);
 
         /* ------------------------------------------------------------------------------------------------------ */
 
@@ -262,7 +273,28 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         HBox fillBarGame = new HBox(new Label("Fill the Bar game!"), fillBarBar, fillBarButton, fillBarLabel,myRectangle,myRectangleLabel);
+        fillBarGame.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
+        fillBarGame.setMaxWidth(600);
         fillBarGame.setSpacing(10);
+        fillBarGame.setPadding(new Insets(20));
+        fillBarGame.setTranslateX(stage.getWidth()/4);
+        fillBarGame.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.DARKGOLDENROD,
+                                new BorderStrokeStyle(
+                                        StrokeType.CENTERED,
+                                        StrokeLineJoin.ROUND,
+                                        StrokeLineCap.ROUND,
+                                        10,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(50),
+                                new BorderWidths(8)
+                        )
+                )
+        );
 
         /* ------------------------------------------------------------------------------------------------------ */
 
