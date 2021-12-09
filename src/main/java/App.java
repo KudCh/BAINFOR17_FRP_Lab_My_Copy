@@ -123,7 +123,7 @@ public class App extends Application {
         Observable<Integer> clicks = JavaFxObservable.actionEventsOf(button)
                 .subscribeOn(Schedulers.computation()) // Switching thread
                 .map(ae -> 1)
-                .scan(0, (acc, newClick) -> acc + newClick);
+                .scan(0, Integer::sum);
 
         Label clicksLabel = new Label();
         clicks
@@ -231,6 +231,7 @@ public class App extends Application {
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
         weatherBox.setMaxWidth(420);
+        weatherBox.setMinHeight(75);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
                 new Border(
