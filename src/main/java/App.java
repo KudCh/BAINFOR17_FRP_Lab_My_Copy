@@ -12,11 +12,10 @@ import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class App extends Application {
 
@@ -118,26 +117,42 @@ public class App extends Application {
 
         Label degreeType = new Label("C");
         String cel = new String("");
-        Observable<String> clickDegrees = JavaFxObservable.actionEventsOf(button)
+        Observable<Integer> clickDegrees = JavaFxObservable.actionEventsOf(button)
                 .subscribeOn(Schedulers.computation()) // Switching thread
-                .map(ae -> {
-                    cel = degreeType.getText();
-                    if (cel.equals("C")){ae::"F"} else {ae::"C";}
-                });
+                .map(ae -> 1)
+                .scan(0, (acc, newClick) -> (acc + newClick)%2);
+               // .map(ae -> {
+               //     cel = degreeType.getText();
+               //     if (cel.equals("C")){ae::"F"} else {ae::"C";}
+               // });
                // .scan(0, (acc, newClick) -> acc + newClick);
 
         Label degreeTypeLabel = new Label();
+        Label degreeNumLabel = new Label();
+
         clickDegrees
                 .observeOn(JavaFxScheduler.platform())
-                .subscribe(clickDegreeType -> degreeTypeLabel.setText(clickDegrees));
+                .subscribe(clickDegreeID -> {
+                    if (clickDegreeID == 0){degreeTypeLabel.setText("F");} else {degreeTypeLabel.setText("C");}
+                        }
+                    //    degreeTypeLabel.setText(clickDegrees)
+                );
+        degreesObservable
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(degree -> {
+                            if (degreeTypeLabel.getText().equals("F")){
+                                degreeNumLabel.setText(String.valueOf((degree-32)));} else {degreeNumLabel.setText(String.valueOf(degree));}
+                        }
+                        //    degreeTypeLabel.setText(clickDegrees)
+                );
 
         // Assemble full view
         VBox container = new VBox();
         container.setStyle("-fx-border-width: 16;");
         HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel);
-        HBox clicksBox = new HBox(button, clicksLabel);
+        HBox clicksBox = new HBox(button);
 
-        HBox weatherBox = new HBox(weatherWithDegreesLabel, degreeTypeLabel);
+        HBox weatherBox = new HBox(weatherWithDegreesLabel, degreeTypeLabel, degreeNumLabel);
         VBox weatherImageBox = new VBox(weatherBox, imageView);
 
         container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox);
