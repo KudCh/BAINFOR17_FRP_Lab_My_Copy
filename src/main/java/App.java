@@ -113,7 +113,7 @@ public class App extends Application {
 
         /* Observable sources from the front end */
         // Getting number of clicks on a button
-        Button button = new Button("C° / F°");
+        Button button = new Button("Switch C° / F°");
 
         Label degreeType = new Label("C");
         String cel = new String("");
@@ -129,6 +129,11 @@ public class App extends Application {
 
         Label degreeTypeLabel = new Label();
         Label degreeNumLabel = new Label();
+        Integer degreeN = 0;
+
+        degreesObservable
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(degr -> {degreeN = degr;});
 
         clickDegrees
                 .observeOn(JavaFxScheduler.platform())
@@ -141,11 +146,20 @@ public class App extends Application {
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(degree -> {
                             if (degreeTypeLabel.getText().equals("F")){
-                                degreeNumLabel.setText(String.valueOf((degree-32)));} else {degreeNumLabel.setText(String.valueOf(degree));}
+                                degreeNumLabel.setText(String.valueOf((degree-2)));} else {degreeNumLabel.setText(String.valueOf(degree));}
                         }
                         //    degreeTypeLabel.setText(clickDegrees)
                 );
-
+   //     degreesClickObservable
+   //             .observeOn(JavaFxScheduler.platform())
+   /*             .subscribe(obsList -> {
+                            Integer clickStatus = obsList[0]
+                            Integer degreeNum = obsList[1]
+                            if (clickStatus==0){
+                                degreeNumLabel.setText(String.valueOf((degreeNum-2)));} else {degreeNumLabel.setText(String.valueOf(degreeNum));}
+                        }
+                        //    degreeTypeLabel.setText(clickDegrees)
+                );*/
         // Assemble full view
         VBox container = new VBox();
         container.setStyle("-fx-border-width: 16;");
@@ -155,7 +169,7 @@ public class App extends Application {
         HBox weatherBox = new HBox(weatherWithDegreesLabel, degreeTypeLabel, degreeNumLabel);
         VBox weatherImageBox = new VBox(weatherBox, imageView);
 
-        container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox);
+        container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox, weatherImageBox);
 
         Scene scene = new Scene(container, 640, 480);
         stage.setScene(scene);
