@@ -128,28 +128,36 @@ public class App extends Application {
                // .scan(0, (acc, newClick) -> acc + newClick);
 
         Label degreeTypeLabel = new Label();
-        Label degreeNumLabel = new Label();
-        Integer degreeN = 0;
+        Label degreeNumLabel = new Label("0");
 
-        degreesObservable
+     /*/   degreesObservable
                 .observeOn(JavaFxScheduler.platform())
-                .subscribe(degr -> {degreeN = degr;});
-
+                .subscribe(degreeNumLabel::setText);
+*/
         clickDegrees
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(clickDegreeID -> {
-                    if (clickDegreeID == 0){degreeTypeLabel.setText("F");} else {degreeTypeLabel.setText("C");}
+                    if (clickDegreeID == 0){
+                        degreeTypeLabel.setText("F");
+                        Integer n = Integer.valueOf(degreeNumLabel.getText());
+                        n = n-2;
+                        degreeNumLabel.setText(String.valueOf(n));
+                    } else {degreeTypeLabel.setText("C");
+                        Integer n = Integer.valueOf(degreeNumLabel.getText());
+                        n = n+2;
+                        degreeNumLabel.setText(String.valueOf(n));
+                    }
                         }
                     //    degreeTypeLabel.setText(clickDegrees)
                 );
-        degreesObservable
+     /*   degreesObservable
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(degree -> {
                             if (degreeTypeLabel.getText().equals("F")){
                                 degreeNumLabel.setText(String.valueOf((degree-2)));} else {degreeNumLabel.setText(String.valueOf(degree));}
                         }
                         //    degreeTypeLabel.setText(clickDegrees)
-                );
+                ); /*/
    //     degreesClickObservable
    //             .observeOn(JavaFxScheduler.platform())
    /*             .subscribe(obsList -> {
