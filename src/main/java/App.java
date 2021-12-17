@@ -20,6 +20,7 @@ import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
 import org.json.*;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -105,34 +106,43 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        final String[] weather = {"CLOUDY", "SUNNY"};
+        /* Observable sources from the backend */
+        final String[] weather = {"cloudy", "sunny"};
         Observable<String> weatherObservable = Observable
                 .interval(5, TimeUnit.SECONDS)
-                .map(Long::intValue) // Converts to int
+                .map(Long::intValue)
                 .map(i -> weather[i % 2]);
 
-        //TODO: Subscribe for text and imageview to the same observable -> they are interlinked
-        Observable<String> weatherImageObservable = Observable
+        final int[] degrees = {15, 20, 25};
+        Observable<Integer> degreesObservable = Observable
                 .interval(5, TimeUnit.SECONDS)
-                .map(Long::intValue) // Converts to int
-                .map(i -> weather[i % 2])
-                .map(name -> "weatherIcons/" + (name.toLowerCase()) + ".png");
+                .map(Long::intValue)
+                .map(i -> degrees[i % 3]);
 
-        Label weatherLabel = new Label();
+        Observable<String> weatherWithDegrees = Observable
+                .combineLatest(weatherObservable, degreesObservable, (currentWeather, currentDegrees) ->
+                        "The weather now is " + currentWeather + ", it's " + currentDegrees.toString() + " °C");
+
+      //  Label weatherLabel = new Label();
+        Image image;
         ImageView imageView = new ImageView();
+        Label imageName = new Label();
+        Label weatherWithDegreesLabel = new Label();
 
+        weatherWithDegrees
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(weatherWithDegreesLabel::setText);
         weatherObservable
-                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(weatherNow -> weatherLabel.setText("\tNow the weather is " + weatherNow));
-        weatherImageObservable
-                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(imgName -> {
-//                    System.out.println(imgName);
-                    FileInputStream input = new FileInputStream(imgName); //TODO: Try catch block -> if img cannot be found in folder
-                    Image img = new Image(input);
-                    imageView.setImage(img);
-                    imageView.setFitHeight(50);
-                    imageView.setFitWidth(50);
+                .map(string -> "weatherIcons/"+ string.toLowerCase() +".png")
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(name -> {
+                    imageName.setText(name);
+                    try {FileInputStream input = new FileInputStream(imageName.getText());
+                        Image png = new Image(input, 50, 50, false, false);
+                        imageView.setImage(png);
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
                 });
 
         /* ------------------------------------------------------------------------------------------------------ */
@@ -299,7 +309,8 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        HBox weatherBox = new HBox(new Label("Weather Box"), weatherLabel, imageView);
+        HBox weatherBox;
+        weatherBox = new HBox(new Label("Weather Box"), weatherWithDegreesLabel, imageView);
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
         weatherBox.setMaxWidth(420);
