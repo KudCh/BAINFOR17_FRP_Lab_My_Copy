@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -17,15 +18,68 @@ import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
+import org.json.*;
 import java.io.FileInputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class App extends Application {
     @Override
     public void start(Stage stage) {
+
+        String URIGetLongLat = "https://freegeoip.app/json/";
+        HttpRequest myReq = HttpRequest.newBuilder()
+                .uri(URI.create(String.format(URIGetLongLat)))
+                .build();
+        HttpClient myClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+
+        CompletableFuture<HttpResponse<String>> resp = myClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString());
+//        CompletableFuture<HttpResponse<String>> obj = asyncResp.thenApply(resp -> {
+//            System.out.println(resp.body());
+//            return resp;
+//        });
+        resp.thenAcceptAsync(res -> {
+            try {
+                JSONObject myObj = new JSONObject(res.body());
+                System.out.println(myObj);
+                String longitude = myObj.getString("longitude");
+                String latitude = myObj.getString("latitude");
+                System.out.println(longitude+" "+latitude);
+
+                String URIGetWeather = String.format("https://www.7timer.info/bin/astro.php?lon=%s&lat=%s&ac=0&unit=metric&output=json&tzshift=0", longitude,latitude);
+                System.out.println(URIGetWeather);
+
+                HttpRequest myReq2 = HttpRequest.newBuilder()
+                        .uri(URI.create(String.format(URIGetWeather)))
+                        .build();
+                CompletableFuture<HttpResponse<String>> resp2 = myClient.sendAsync(myReq2, HttpResponse.BodyHandlers.ofString());
+                resp2.thenAcceptAsync(res2 -> {
+                    try {
+                        JSONObject myObj2 = new JSONObject(res2.body());
+                        System.out.println(myObj2);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        });
+
         /* Observable gives the current time every 200 ms */
         stage.setTitle("Team Abandoned Dashboard");
         stage.setWidth(1500);
@@ -34,14 +88,14 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        Observable<Long> digitalClock = Observable.interval(200,TimeUnit.MILLISECONDS);
+        Observable<Long> digitalClock = Observable.interval(200, TimeUnit.MILLISECONDS);
         /* Observable gives the current day every minute */
-        Observable<Long> digitalDate = Observable.interval(1,TimeUnit.MINUTES);
+        Observable<Long> digitalDate = Observable.interval(1, TimeUnit.MINUTES);
         Label digitalClockLabel = new Label();
         Label digitalDateLabel = new Label();
         digitalDateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        digitalClockLabel.setTextFill(Color.rgb(166,50,248));
-        digitalDateLabel.setTextFill(Color.rgb(166,50,150));
+        digitalClockLabel.setTextFill(Color.rgb(166, 50, 248));
+        digitalDateLabel.setTextFill(Color.rgb(166, 50, 150));
         digitalClock
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(e -> digitalClockLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
@@ -61,8 +115,8 @@ public class App extends Application {
         Observable<String> weatherImageObservable = Observable
                 .interval(5, TimeUnit.SECONDS)
                 .map(Long::intValue) // Converts to int
-                .map(i -> weather[i%2])
-                .map(name -> "weatherIcons/"+(name.toLowerCase())+ ".png");
+                .map(i -> weather[i % 2])
+                .map(name -> "weatherIcons/" + (name.toLowerCase()) + ".png");
 
         Label weatherLabel = new Label();
         ImageView imageView = new ImageView();
@@ -139,7 +193,7 @@ public class App extends Application {
         Button fillBarButton = new Button("Click fast to fill bar!");
         AtomicReference<Float> progressFloat = new AtomicReference<>(0.0F);
         AtomicReference<Integer> clickCounter = new AtomicReference<>(0);
-        Rectangle myRectangle = new Rectangle(50,50);
+        Rectangle myRectangle = new Rectangle(50, 50);
         myRectangle.setFill(Color.RED);
         Label myRectangleLabel = new Label();
 
@@ -149,25 +203,25 @@ public class App extends Application {
                 .map(increase -> {
                     clickCounter.updateAndGet(i -> i + 1);
                     Float currentProgress = progressFloat.get();
-                    if (currentProgress+increase >= 1.0F) {
+                    if (currentProgress + increase >= 1.0F) {
                         progressFloat.set(1.0F);
                     } else {
-                        progressFloat.set(currentProgress+increase);
+                        progressFloat.set(currentProgress + increase);
                     }
                     return (progressFloat.get());
                 });
         Observable<Float> fillBarDecay = Observable
-                .interval(250,TimeUnit.MILLISECONDS)
+                .interval(250, TimeUnit.MILLISECONDS)
                 .map(decay -> 0.02F)
                 .map(decrease -> {
                     Float currentProgress = progressFloat.get();
 //                    System.out.println(currentProgress);
-                    if (currentProgress-decrease <= 0) {
+                    if (currentProgress - decrease <= 0) {
                         progressFloat.set(0.0F);
-                    }else {
-                        progressFloat.set(currentProgress-decrease);
+                    } else {
+                        progressFloat.set(currentProgress - decrease);
                     }
-                    return  progressFloat.get();
+                    return progressFloat.get();
                 });
         Label fillBarLabel = new Label();
         fillBarButtonClick
@@ -176,7 +230,7 @@ public class App extends Application {
                     fillBarBar.setProgress(currentProgress);
                     if (progressFloat.get() == 1.0F) {
                         myRectangle.setFill(Color.GREEN);
-                        myRectangleLabel.setText("You win! It took: "+clickCounter.get()+" clicks!");
+                        myRectangleLabel.setText("You win! It took: " + clickCounter.get() + " clicks!");
                     }
                 });
         fillBarDecay
@@ -199,6 +253,13 @@ public class App extends Application {
 
         /* Next feature: ... */
         //TODO: Implement new feature
+        TextField nameTextField = new TextField();
+        AtomicReference<String> typedString = new AtomicReference<>(new String());
+        Label textFieldLabel = new Label();
+        nameTextField.onKeyTypedProperty().set(c -> {
+            typedString.updateAndGet(v -> v + c.getCharacter());
+            textFieldLabel.setText(typedString.get());
+        });
 
 
         /* ------------------------------------------------------------------------------------------------------ */
@@ -207,12 +268,12 @@ public class App extends Application {
         VBox container = new VBox(new Label("Container"));
         container.setStyle("-fx-background-color:#6e6969;");
         container.setSpacing(5);
-        container.setMaxWidth(stage.getMaxWidth()/2);
-        container.setMaxHeight(stage.getMaxHeight()/2);
+        container.setMaxWidth(stage.getMaxWidth() / 2);
+        container.setMaxHeight(stage.getMaxHeight() / 2);
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        HBox clockHBox = new HBox(new Label("Date & Digital clock"),digitalDateLabel, digitalClockLabel);
+        HBox clockHBox = new HBox(new Label("Date & Digital clock"), digitalDateLabel, digitalClockLabel);
         clockHBox.setTranslateX(10);
         clockHBox.setSpacing(20);
         clockHBox.setMaxWidth(420);
@@ -238,7 +299,7 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        HBox weatherBox = new HBox(new Label("Weather Box"),weatherLabel, imageView);
+        HBox weatherBox = new HBox(new Label("Weather Box"), weatherLabel, imageView);
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
         weatherBox.setMaxWidth(420);
@@ -272,12 +333,12 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        HBox fillBarGame = new HBox(new Label("Fill the Bar game!"), fillBarBar, fillBarButton, fillBarLabel,myRectangle,myRectangleLabel);
+        HBox fillBarGame = new HBox(new Label("Fill the Bar game!"), fillBarBar, fillBarButton, fillBarLabel, myRectangle, myRectangleLabel);
         fillBarGame.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
         fillBarGame.setMaxWidth(600);
         fillBarGame.setSpacing(10);
         fillBarGame.setPadding(new Insets(20));
-        fillBarGame.setTranslateX(stage.getWidth()/4);
+        fillBarGame.setTranslateX(stage.getWidth() / 4);
         fillBarGame.setBorder(
                 new Border(
                         new BorderStroke(
@@ -298,11 +359,15 @@ public class App extends Application {
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        container.getChildren().addAll(clockHBox, weatherBox, nameWithTickBox, clicksBox, fillBarGame);
+        HBox textHBox = new HBox(nameTextField, textFieldLabel);
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        container.getChildren().addAll(clockHBox, weatherBox, nameWithTickBox, clicksBox, fillBarGame, textHBox);
         Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
-}
+    }
     public static void main(String ... args) {
         launch();
     }
