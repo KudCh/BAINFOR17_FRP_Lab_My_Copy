@@ -51,44 +51,26 @@ public class App extends Application {
 
 
         // Combines two observables
-        Observable<String> nameWithTick = Observable
-                .combineLatest(oddTicks, nameObservable, (currentTick, currentName) -> currentName + currentTick);
-
         Observable<String> weatherWithDegrees = Observable
                 .combineLatest(weatherObservable, degreesObservable, (currentWeather, currentDegrees) -> "The weather now is: " + currentWeather + "; " + currentDegrees.toString() + "degrees");
 
-        // Static labels
-        Label plus = new Label(" + ");
-        Label equals = new Label(" = ");
-
-
         // Displaying changing data in the UI
-        Label nameLabel = new Label();
-        Label tickLabel = new Label();
-        Label nameWithTickLabel = new Label();
         Label weatherLabel = new Label();
         Image image;
         ImageView imageView = new ImageView();
-        //String imageName = new String();
         Label imageName = new Label();
         Label weatherWithDegreesLabel = new Label();
 
 
         // Observing observables values and reacting to new values by updating the UI components
-        nameObservable
-                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-                .subscribe(nameLabel::setText);
         weatherWithDegrees
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(weatherWithDegreesLabel::setText);
-      //  weatherObservable
-      //          .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-      //          .subscribe(weatherNow -> weatherLabel.setText("\tNow the weather is " + weatherNow));
         weatherObservable
                 .map(string -> string.toLowerCase() +".png")
-                .observeOn(JavaFxScheduler.platform()) // Updates of the UI need to be done on the JavaFX thread
-               // .subscribe(imageName::setText);
-                .subscribe(name -> { imageName.setText(name);
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(name -> {
+                    imageName.setText(name);
                     try {FileInputStream input = new FileInputStream(imageName.getText());
                         Image png = new Image(input, 100, 100, false, false);
                         imageView.setImage(png);
@@ -96,20 +78,6 @@ public class App extends Application {
                         ex.printStackTrace();
                     }
                 });
-
-
-        oddTicks
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(currentTick -> tickLabel.setText(currentTick.toString()));
-        nameWithTick
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(nameWithTickLabel::setText);
-
-
-//        String newName = new String(imageName.getText());
-
-
-
 
         /* Observable sources from the front end */
         // Getting number of clicks on a button
