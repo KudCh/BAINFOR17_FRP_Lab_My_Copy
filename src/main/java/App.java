@@ -13,7 +13,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Team Abandoned Dashboard");
-        stage.setWidth(750);
+        stage.setWidth(1500);
         stage.setHeight(750);
 
         // Assemble full view
@@ -113,6 +113,14 @@ public class App extends Application {
                         )
                 )
         );
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        CryptoFeature cryptoFeature = new CryptoFeature();
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        MemeFeature memeFeature = new MemeFeature();
 
         /* ------------------------------------------------------------------------------------------------------ */
 
