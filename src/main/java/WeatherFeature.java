@@ -31,26 +31,27 @@ public class WeatherFeature {
 
         HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(URIGetWeather))).build();
 
-        //CompletableFuture<HttpResponse<String>>
-        CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
-                .thenApplyAsync(resp ->{
-                    myObj = new JSONObject(resp.body());
-                    try {
-                        JSONArray arr = myObj.getJSONArray("weather");
-                        JSONObject data1 = arr.getJSONObject(0);
-                        String weatherD = data1.getString("description");
-
-                        JSONObject data2 = myObj.getJSONObject("main");
-                        Integer temperature = data2.getInt("temp");
-
-                        Weather weatherObjj = new Weather(weatherD,temperature);
-
-                        return CompletableFuture.completedFuture(weatherObjj);
-
-                    } catch (JSONException e) { e.printStackTrace(); }
-                    return null;
-                })
-                .join();
+//        //CompletableFuture<HttpResponse<String>>
+//        CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+//                .thenApplyAsync(resp ->{
+//                    myObj = new JSONObject(resp.body());
+//                    try {
+//                        JSONArray arr = myObj.getJSONArray("weather");
+//                        JSONObject data1 = arr.getJSONObject(0);
+//                        String weatherD = data1.getString("description");
+//
+//                        JSONObject data2 = myObj.getJSONObject("main");
+//                        Integer temperature = data2.getInt("temp");
+//
+//                        Weather weatherObjj = new Weather(weatherD,temperature);
+//
+//                        return CompletableFuture.completedFuture(weatherObjj);
+//
+//                    } catch (JSONException e) { e.printStackTrace(); }
+//                    return null;
+//                })
+//                .join();
+        return null;
     }
 
 
@@ -75,7 +76,7 @@ public class WeatherFeature {
                         String temp = String.valueOf(wObj.temp);
 
                         weatherObjLabel.setText(descr + ", " + temp);
-                    } catch (JSONException e){}
+                    } catch (Exception e){}
                 });
 
     }
