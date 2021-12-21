@@ -1,161 +1,135 @@
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.Image;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
+import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
-import org.pdfsam.rxjavafx.observables.JavaFxObservable;
-import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class App extends Application {
-
     @Override
     public void start(Stage stage) {
+        stage.setTitle("Team Abandoned Dashboard");
+        stage.setWidth(1500);
+        stage.setHeight(750);
 
-        /* Observable sources from the backend */
-        Observable<Integer> oddTicks = Observable
-                .interval(3, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
-                .map(Long::intValue) // Converts to int
-                .filter(v -> v % 2 != 0); // Filters out even numbers 
-
-        // Gets a different name every 2 seconds
-        final String[] names = {"Alice", "Bob", "Pierre", "Gabriel", "Manuel"};
-        Observable<String> nameObservable = Observable
-                .interval(2, TimeUnit.SECONDS)
-                .map(Long::intValue)
-                .map(i -> names[i % names.length]);
-
-        /* Observable sources from the backend */
-        final String[] weather = {"CLOUDY", "SUNNY"};
-        Observable<String> weatherObservable = Observable
-                .interval(5, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
-                .map(Long::intValue) // Converts to int
-                .map(i -> weather[i % 2]);
-
-        /* Observable sources from the backend */
-        final int[] degrees = {15, 20, 25};
-        Observable<Integer> degreesObservable = Observable
-                .interval(5, TimeUnit.SECONDS) // Every 3 seconds, increments the number in the observable
-                .map(Long::intValue) // Converts to int
-                .map(i -> degrees[i % 3]);
-
-
-        // Combines two observables
-        Observable<String> weatherWithDegrees = Observable
-                .combineLatest(weatherObservable, degreesObservable, (currentWeather, currentDegrees) -> "The weather now is: " + currentWeather + "; " + currentDegrees.toString() + "degrees");
-
-        // Displaying changing data in the UI
-        Label weatherLabel = new Label();
-        Image image;
-        ImageView imageView = new ImageView();
-        Label imageName = new Label();
-        Label weatherWithDegreesLabel = new Label();
-
-
-        // Observing observables values and reacting to new values by updating the UI components
-        weatherWithDegrees
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(weatherWithDegreesLabel::setText);
-        weatherObservable
-                .map(string -> string.toLowerCase() +".png")
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(name -> {
-                    imageName.setText(name);
-                    try {FileInputStream input = new FileInputStream(imageName.getText());
-                        Image png = new Image(input, 100, 100, false, false);
-                        imageView.setImage(png);
-                    } catch (FileNotFoundException ex) {
-                        ex.printStackTrace();
-                    }
-                });
-
-        /* Observable sources from the front end */
-        // Getting number of clicks on a button
-        Button button = new Button("Switch C° / F°");
-
-        Label degreeType = new Label("C");
-        String cel = new String("");
-        Observable<Integer> clickDegrees = JavaFxObservable.actionEventsOf(button)
-                .subscribeOn(Schedulers.computation()) // Switching thread
-                .map(ae -> 1)
-                .scan(0, (acc, newClick) -> (acc + newClick)%2);
-               // .map(ae -> {
-               //     cel = degreeType.getText();
-               //     if (cel.equals("C")){ae::"F"} else {ae::"C";}
-               // });
-               // .scan(0, (acc, newClick) -> acc + newClick);
-
-        Label degreeTypeLabel = new Label();
-        Label degreeNumLabel = new Label("0");
-
-     /*/   degreesObservable
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(degreeNumLabel::setText);
-*/
-        clickDegrees
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(clickDegreeID -> {
-                    if (clickDegreeID == 0){
-                        degreeTypeLabel.setText("F");
-                        Integer n = Integer.valueOf(degreeNumLabel.getText());
-                        n = n-2;
-                        degreeNumLabel.setText(String.valueOf(n));
-                    } else {degreeTypeLabel.setText("C");
-                        Integer n = Integer.valueOf(degreeNumLabel.getText());
-                        n = n+2;
-                        degreeNumLabel.setText(String.valueOf(n));
-                    }
-                        }
-                    //    degreeTypeLabel.setText(clickDegrees)
-                );
-     /*   degreesObservable
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(degree -> {
-                            if (degreeTypeLabel.getText().equals("F")){
-                                degreeNumLabel.setText(String.valueOf((degree-2)));} else {degreeNumLabel.setText(String.valueOf(degree));}
-                        }
-                        //    degreeTypeLabel.setText(clickDegrees)
-                ); /*/
-   //     degreesClickObservable
-   //             .observeOn(JavaFxScheduler.platform())
-   /*             .subscribe(obsList -> {
-                            Integer clickStatus = obsList[0]
-                            Integer degreeNum = obsList[1]
-                            if (clickStatus==0){
-                                degreeNumLabel.setText(String.valueOf((degreeNum-2)));} else {degreeNumLabel.setText(String.valueOf(degreeNum));}
-                        }
-                        //    degreeTypeLabel.setText(clickDegrees)
-                );*/
         // Assemble full view
-        VBox container = new VBox();
-        container.setStyle("-fx-border-width: 16;");
-        HBox nameWithTickBox = new HBox(nameLabel, plus, tickLabel, equals, nameWithTickLabel);
-        HBox clicksBox = new HBox(button);
+        VBox container = new VBox(new Label());
+        container.setStyle("-fx-background-color:#6e6969;");
+        container.setSpacing(5);
+        container.setMaxWidth(stage.getMaxWidth() / 2);
+        container.setMaxHeight(stage.getMaxHeight() / 2);
 
-        HBox weatherBox = new HBox(weatherWithDegreesLabel, degreeTypeLabel, degreeNumLabel);
-        VBox weatherImageBox = new VBox(weatherBox, imageView);
+        /* ------------------------------------------------------------------------------------------------------ */
 
-        container.getChildren().addAll(nameWithTickBox, clicksBox, weatherBox, weatherImageBox);
+        ClockFeature clockFeature = new ClockFeature(); // initialize the ClockFeature
+        HBox clockHBox = new HBox(new Label("Date & Clock"), clockFeature.digitalDateLabel, clockFeature.digitalClockLabel);
+        clockHBox.setTranslateX(10);
+        clockHBox.setSpacing(20);
+        clockHBox.setMaxWidth(420);
+        clockHBox.setPadding(new Insets(20));
+        clockHBox.setStyle("-fx-background-color:#ffffff;");
+        clockHBox.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.BLACK,
+                                new BorderStrokeStyle(
+                                        StrokeType.INSIDE,
+                                        StrokeLineJoin.MITER,
+                                        StrokeLineCap.BUTT,
+                                        10,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(0),
+                                new BorderWidths(8)
+                        )
+                )
+        );
 
-        Scene scene = new Scene(container, 640, 480);
+        /* ------------------------------------------------------------------------------------------------------ */
+        WeatherFeature weatherFeature = new WeatherFeature();
+        HBox weatherBox = new HBox(new Label("Weather Box"),
+                weatherFeature.weatherLabel,
+                weatherFeature.imageView
+        );
+        weatherBox.setTranslateX(10);
+        weatherBox.setSpacing(20);
+        weatherBox.setMaxWidth(420);
+        weatherBox.setMinHeight(75);
+        weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
+        weatherBox.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.BLACK,
+                                new BorderStrokeStyle(
+                                        StrokeType.INSIDE,
+                                        StrokeLineJoin.MITER,
+                                        StrokeLineCap.BUTT,
+                                        5,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(10),
+                                new BorderWidths(2)
+                        )
+                )
+        );
+
+        /* ------------------------------------------------------------------------------------------------------ */
+        FillBarGameFeature fillBarGameFeature = new FillBarGameFeature();
+        HBox fillBarGame = new HBox(
+                new Label("Fill the Bar game!"),
+                fillBarGameFeature.bar,
+                fillBarGameFeature.fillButton,
+                fillBarGameFeature.restartButton,
+                fillBarGameFeature.rectangle,
+                fillBarGameFeature.fillBarLabel,
+                fillBarGameFeature.rectangleLabel,
+                fillBarGameFeature.difficultyMenuBar
+        );
+        fillBarGame.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
+        fillBarGame.setMaxWidth(1000);
+        fillBarGame.setSpacing(10);
+        fillBarGame.setPadding(new Insets(20));
+        fillBarGame.setTranslateX(stage.getWidth() / 4);
+        fillBarGame.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.DARKGOLDENROD,
+                                new BorderStrokeStyle(
+                                        StrokeType.CENTERED,
+                                        StrokeLineJoin.ROUND,
+                                        StrokeLineCap.ROUND,
+                                        10,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(50),
+                                new BorderWidths(8)
+                        )
+                )
+        );
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        CryptoFeature cryptoFeature = new CryptoFeature();
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        MemeFeature memeFeature = new MemeFeature();
+
+        /* ------------------------------------------------------------------------------------------------------ */
+
+        container.getChildren().addAll(clockHBox, weatherBox, fillBarGame);
+        Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
     }
-
     public static void main(String ... args) {
         launch();
     }
-
-
-
 }

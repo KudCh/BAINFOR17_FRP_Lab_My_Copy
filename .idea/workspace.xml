@@ -5,6 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa82bdfa-5f77-4a91-ad82-3b0da22338d0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ClockFeature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/CryptoFeature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/FillBarGameFeature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/MemeFeature.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/WeatherFeature.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/BAINFOR17_FRP_Lab_My_Copy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BAINFOR17_FRP_Lab_My_Copy.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_12_2021_22_16__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_12_2021_22_16__Default_Changelist_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_12_2021_23_22__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_12_2021_23_22__Default_Changelist_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/App.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
