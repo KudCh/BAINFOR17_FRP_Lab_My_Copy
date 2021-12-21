@@ -53,8 +53,7 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
         WeatherFeature weatherFeature = new WeatherFeature();
         HBox weatherBox = new HBox(new Label("Weather Box"),
-                weatherFeature.weatherLabel,
-                weatherFeature.imageView
+                weatherFeature.weatherObjLabel
         );
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
