@@ -28,14 +28,6 @@
                     <mainClass>App</mainClass>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>15</source>
-                    <target>15</target>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
@@ -56,12 +48,6 @@
             <groupId>org.pdfsam.rxjava3</groupId>
             <artifactId>rxjavafx</artifactId>
             <version>${rxjavafx.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20090211</version>
         </dependency>
 
     </dependencies>
