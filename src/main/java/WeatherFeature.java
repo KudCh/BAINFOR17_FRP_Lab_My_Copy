@@ -18,12 +18,41 @@ import java.util.concurrent.TimeUnit;
 
 public class WeatherFeature {
 
-    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
+    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
+    static String uriGetLongLat = "https://freegeoip.app/json/";
     private static JSONObject myObj;
     public Label weatherObjLabel = new Label();
 
 
-    static CompletableFuture<Weather> queryWeather(String cityName) {
+    static CompletableFuture<Pair<String, String>> queryWeather(String cityName) {
+
+        String geoURI = uriGetLongLat;
+        HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(geoURI))).build();
+
+        CompletableFuture<Pair<String, String>> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+                .thenAcceptAsync(resp -> {
+                    try {
+                        JSONObject jsonObject = new JSONObject(resp.body());
+                        String latitude = jsonObject.getString("latitude");
+                        String longitude = jsonObject.getString("longitude");
+
+                        Pair geoPair = new Pair(latitude, longitude);
+                        return CompletableFuture.completedFuture(geoPair);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .join();
+        return response;
+    }
+
+    static Weather queryWeather(String cityName) {
 
         String URIGetWeather = String.format(getWeatherURI, cityName);
 
@@ -35,7 +64,7 @@ public class WeatherFeature {
         HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(URIGetWeather))).build();
 
         //CompletableFuture<HttpResponse<String>>
-        CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+        Weather response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
                     try {
                         myObj = new JSONObject(resp.body());
@@ -49,7 +78,7 @@ public class WeatherFeature {
 
                         Weather weatherObjj = new Weather(weatherD,temperature, iconID);
 
-                        return CompletableFuture.completedFuture(weatherObjj);
+                        return weatherObjj;
 
                     } catch (JSONException e) { e.printStackTrace(); }
                     return null;
@@ -64,7 +93,7 @@ public class WeatherFeature {
     public WeatherFeature(){
         final String[] cities = {"Luxembourg", "Berlin","New+York"};
         Observable<String> cityObservable = Observable
-                .interval(3, TimeUnit.SECONDS)
+                .interval(0, 10, TimeUnit.SECONDS)
                 .map(Long::intValue)
                 .map(i -> cities[i % cities.length]);
 
