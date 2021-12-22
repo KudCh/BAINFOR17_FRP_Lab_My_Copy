@@ -142,12 +142,14 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         CryptoFeature cryptoFeature = new CryptoFeature();
+        Label cryptoTitle = new Label("Cryptocurrencies!");
         HBox crypto = new HBox(
-                new Label("Crypto!"),
-                cryptoFeature.cryptoLabel
+                cryptoTitle,
+                cryptoFeature.cryptoText
         );
 
         /* ------------------------------------------------------------------------------------------------------ */
+
         container.setAlignment(Pos.TOP_CENTER);
         container.getChildren().addAll(clockBox, weatherBox, crypto, gameVBox);
         Scene scene = new Scene(container);
