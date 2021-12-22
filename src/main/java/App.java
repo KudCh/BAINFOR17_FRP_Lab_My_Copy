@@ -15,6 +15,8 @@ public class App extends Application {
         stage.setTitle("Team Abandoned Dashboard");
         stage.setWidth(1500);
         stage.setHeight(750);
+//        stage.setFullScreen(true);
+        stage.setMaximized(true);
 
         // Assemble full view
         VBox container = new VBox(new Label());
@@ -53,8 +55,7 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
         WeatherFeature weatherFeature = new WeatherFeature();
         HBox weatherBox = new HBox(new Label("Weather Box"),
-                weatherFeature.weatherLabel,
-                weatherFeature.imageView
+                weatherFeature.weatherObjLabel
         );
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
@@ -117,14 +118,21 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         CryptoFeature cryptoFeature = new CryptoFeature();
+        HBox crypto = new HBox(
+                new Label("Crypto!"),
+                cryptoFeature.cryptoLabel
+        );
 
         /* ------------------------------------------------------------------------------------------------------ */
 
         MemeFeature memeFeature = new MemeFeature();
+        HBox memes = new HBox(
+                new Label("Memes!")
+        );
 
         /* ------------------------------------------------------------------------------------------------------ */
 
-        container.getChildren().addAll(clockHBox, weatherBox, fillBarGame);
+        container.getChildren().addAll(clockHBox, weatherBox, fillBarGame, crypto, memes);
         Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
