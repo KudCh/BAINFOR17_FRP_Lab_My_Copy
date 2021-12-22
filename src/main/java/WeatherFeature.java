@@ -20,7 +20,7 @@ public class WeatherFeature {
     public Label weatherObjLabel = new Label();
 
 
-    static CompletableFuture<Weather> queryWeather(String cityName) {
+    static CompletableFuture<Object> queryWeather(String cityName) {
 
         String URIGetWeather = String.format(getWeatherURI, cityName);
 
@@ -32,7 +32,7 @@ public class WeatherFeature {
         HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(URIGetWeather))).build();
 
         //CompletableFuture<HttpResponse<String>>
-        CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+        CompletableFuture<Object> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
                     try {
                         myObj = new JSONObject(resp.body());
@@ -50,7 +50,7 @@ public class WeatherFeature {
                     } catch (JSONException e) { e.printStackTrace(); }
                     return null;
                 })
-                .join();
+                ;
         return response;
     }
 
@@ -64,17 +64,19 @@ public class WeatherFeature {
 
 
 
-        Observable<Weather> currentWeather = cityObservable
+        Observable<Object> currentWeather = cityObservable
                 .flatMap(cityName -> Observable.fromFuture(queryWeather(cityName)));
 
         //Label weatherObjLabel = new Label();
         currentWeather
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(wObj -> {
-                    String descr = wObj.weather;
-                    String temp = String.valueOf(wObj.temp);
-
-                    weatherObjLabel.setText(descr + ", " + temp);
+                    System.out.println(wObj);
+                    System.out.println(wObj.toString());
+//                    String descr = wObj.weather;
+//                    String temp = String.valueOf(wObj.temp);
+//
+//                    weatherObjLabel.setText(descr + ", " + temp);
                 });
 
     }

@@ -70,6 +70,7 @@ public class FillBarGameFeature {
                 .interval(100, TimeUnit.MILLISECONDS, Schedulers.computation())
                 .map(decay -> 0.010F);  // Decay increases every second by 10% of total progress
 
+        // Collection here
         Observable<Pair<Integer,Float>> fillBarProgress = Observable
                 .combineLatest(fillBarClicks,fillBarDecay, (nrClicks, decay) -> {
                     decaySum.updateAndGet(sum -> sum + decay);
@@ -101,7 +102,7 @@ public class FillBarGameFeature {
                     }
                 });
 
-        /* add & dispose of disposables */
+        /* add disposables */
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         compositeDisposable.addAll(disposable1, disposable2, disposable3);
     }
