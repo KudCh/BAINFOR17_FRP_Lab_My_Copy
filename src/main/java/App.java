@@ -8,6 +8,8 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.shape.StrokeType;
 import javafx.stage.Stage;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 
 public class App extends Application {
     @Override
@@ -53,7 +55,9 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
         WeatherFeature weatherFeature = new WeatherFeature();
         HBox weatherBox = new HBox(new Label("Weather Box"),
-                weatherFeature.weatherObjLabel
+                weatherFeature.cityName,
+                weatherFeature.weatherObjLabel,
+                weatherFeature.imageView
         );
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);

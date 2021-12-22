@@ -1,9 +1,12 @@
 import io.reactivex.rxjava3.core.Observable;
 import javafx.scene.control.Label;
+import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -34,16 +37,17 @@ public class WeatherFeature {
         //CompletableFuture<HttpResponse<String>>
         CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
-                    myObj = new JSONObject(resp.body());
                     try {
+                        myObj = new JSONObject(resp.body());
                         JSONArray arr = myObj.getJSONArray("weather");
                         JSONObject data1 = arr.getJSONObject(0);
                         String weatherD = data1.getString("description");
+                        String iconID = data1.getString("icon");
 
                         JSONObject data2 = myObj.getJSONObject("main");
                         Integer temperature = data2.getInt("temp");
 
-                        Weather weatherObjj = new Weather(weatherD,temperature);
+                        Weather weatherObjj = new Weather(weatherD,temperature, iconID);
 
                         return CompletableFuture.completedFuture(weatherObjj);
 
@@ -51,13 +55,16 @@ public class WeatherFeature {
                     return null;
                 })
                 .join();
+        return response;
     }
 
+    ImageView imageView = new ImageView();
+    Label cityName = new Label();
 
     public WeatherFeature(){
-        final String[] cities = {"Luxembourg", "New York"};
+        final String[] cities = {"Luxembourg", "Berlin","New+York"};
         Observable<String> cityObservable = Observable
-                .interval(2, TimeUnit.SECONDS)
+                .interval(3, TimeUnit.SECONDS)
                 .map(Long::intValue)
                 .map(i -> cities[i % cities.length]);
 
@@ -66,17 +73,31 @@ public class WeatherFeature {
         Observable<Weather> currentWeather = cityObservable
                 .flatMap(cityName -> Observable.fromFuture(queryWeather(cityName)));
 
-        //Label weatherObjLabel = new Label();
-        currentWeather
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(wObj -> {
-                    try {
-                        String descr = wObj.weather;
-                        String temp = String.valueOf(wObj.temp);
 
-                        weatherObjLabel.setText(descr + ", " + temp);
-                    } catch (JSONException e){}
+        Observable<Pair<Weather,String>> wetherAndCityObs = Observable
+                .combineLatest(currentWeather, cityObservable, (wObj, city) ->{
+
+                    return new Pair<>(wObj,city);
                 });
+        wetherAndCityObs
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(p -> {
+
+                    Weather wObj = p.getKey();
+                    String city = p.getValue();
+
+                    String descr = wObj.weather;
+                    String temp = String.valueOf(wObj.temp);
+
+                    weatherObjLabel.setText(descr + ", " + temp + "°C");
+                    cityName.setText(city);
+
+                    String iconID = wObj.iconID;
+                    String imageSource = "http://openweathermap.org/img/wn/"+iconID+"@2x.png";
+                    Image png = new Image(imageSource, 100, 100, false, false);
+                    imageView.setImage(png);
+                });
+
 
     }
 
