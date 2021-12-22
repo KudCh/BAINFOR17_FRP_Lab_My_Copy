@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
@@ -12,29 +13,31 @@ import javafx.stage.Stage;
 public class App extends Application {
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Team Abandoned Dashboard");
-        stage.setWidth(1500);
-        stage.setHeight(750);
-//        stage.setFullScreen(true);
+        stage.setTitle("Dashboard of Team Abandoned!");
+        stage.setWidth(800);
+        stage.setHeight(400);
         stage.setMaximized(true);
 
-        // Assemble full view
+        // Container will contain all features of the dashboard
         VBox container = new VBox(new Label());
         container.setStyle("-fx-background-color:#6e6969;");
-        container.setSpacing(5);
-        container.setMaxWidth(stage.getMaxWidth() / 2);
-        container.setMaxHeight(stage.getMaxHeight() / 2);
+        container.setSpacing(30);   // Contents of Container are less cramped together
 
         /* ------------------------------------------------------------------------------------------------------ */
 
         ClockFeature clockFeature = new ClockFeature(); // initialize the ClockFeature
-        HBox clockHBox = new HBox(new Label("Date & Clock"), clockFeature.digitalDateLabel, clockFeature.digitalClockLabel);
-        clockHBox.setTranslateX(10);
-        clockHBox.setSpacing(20);
-        clockHBox.setMaxWidth(420);
-        clockHBox.setPadding(new Insets(20));
-        clockHBox.setStyle("-fx-background-color:#ffffff;");
-        clockHBox.setBorder(
+        Label clockLabel = new Label("Date & Clock:");
+        HBox clockBox = new HBox(
+                clockLabel,
+                clockFeature.digitalDateLabel,
+                clockFeature.digitalClockLabel
+        );
+        clockLabel.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #2a52c9;");
+        clockBox.setMaxWidth(400);
+        clockBox.setSpacing(20);
+        clockBox.setPadding(new Insets(20));
+        clockBox.setStyle("-fx-background-color:#ffffff;");
+        clockBox.setBorder(
                 new Border(
                         new BorderStroke(
                                 Color.BLACK,
@@ -53,12 +56,14 @@ public class App extends Application {
         );
 
         /* ------------------------------------------------------------------------------------------------------ */
+
         WeatherFeature weatherFeature = new WeatherFeature();
-        HBox weatherBox = new HBox(new Label("Weather Box"),
+        Label weatherLabel = new Label("Weather Feature:");
+        FlowPane weatherBox = new FlowPane(
+                weatherLabel,
                 weatherFeature.weatherObjLabel
         );
-        weatherBox.setTranslateX(10);
-        weatherBox.setSpacing(20);
+        weatherBox.setHgap(20);
         weatherBox.setMaxWidth(420);
         weatherBox.setMinHeight(75);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
@@ -81,23 +86,42 @@ public class App extends Application {
         );
 
         /* ------------------------------------------------------------------------------------------------------ */
+
         FillBarGameFeature fillBarGameFeature = new FillBarGameFeature();
-        HBox fillBarGame = new HBox(
-                new Label("Fill the Bar game!"),
-                fillBarGameFeature.bar,
-                fillBarGameFeature.fillButton,
-                fillBarGameFeature.restartButton,
-                fillBarGameFeature.rectangle,
-                fillBarGameFeature.fillBarLabel,
-                fillBarGameFeature.rectangleLabel,
-                fillBarGameFeature.difficultyMenuBar
+        Label gameLabel = new Label("Fill the Bar game!");
+        gameLabel.setStyle("-fx-font-size: 40;"+"-fx-text-fill: #b3c6ff;");
+        HBox gameHBox0 = new HBox(
+                gameLabel
         );
-        fillBarGame.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
-        fillBarGame.setMaxWidth(1000);
-        fillBarGame.setSpacing(10);
-        fillBarGame.setPadding(new Insets(20));
-        fillBarGame.setTranslateX(stage.getWidth() / 4);
-        fillBarGame.setBorder(
+        HBox gameHBox1 = new HBox(
+                fillBarGameFeature.textLabel
+        );
+        fillBarGameFeature.textLabel.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #b3c6ff;");
+
+        HBox gameHBox2 = new HBox(
+                fillBarGameFeature.difficultyMenuBar,
+                fillBarGameFeature.fillButton,
+                fillBarGameFeature.restartButton
+        );
+        gameHBox2.setSpacing(25);
+
+        HBox gameHBox3 = new HBox(
+                fillBarGameFeature.bar,
+                fillBarGameFeature.rectangle
+        );
+        gameHBox3.setSpacing(25);
+
+        gameHBox0.setAlignment(Pos.BOTTOM_CENTER);
+        gameHBox1.setAlignment(Pos.BOTTOM_CENTER);
+        gameHBox2.setAlignment(Pos.BOTTOM_CENTER);
+        gameHBox3.setAlignment(Pos.BOTTOM_CENTER);
+        VBox gameVBox = new VBox(gameHBox0,gameHBox1,gameHBox2,gameHBox3);
+
+        gameVBox.setMaxWidth(750);
+        gameVBox.setSpacing(20);
+        gameVBox.setPadding(new Insets(20));
+        gameVBox.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
+        gameVBox.setBorder(
                 new Border(
                         new BorderStroke(
                                 Color.DARKGOLDENROD,
@@ -124,15 +148,8 @@ public class App extends Application {
         );
 
         /* ------------------------------------------------------------------------------------------------------ */
-
-        MemeFeature memeFeature = new MemeFeature();
-        HBox memes = new HBox(
-                new Label("Memes!")
-        );
-
-        /* ------------------------------------------------------------------------------------------------------ */
-
-        container.getChildren().addAll(clockHBox, weatherBox, fillBarGame, crypto, memes);
+        container.setAlignment(Pos.TOP_CENTER);
+        container.getChildren().addAll(clockBox, weatherBox, crypto, gameVBox);
         Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
