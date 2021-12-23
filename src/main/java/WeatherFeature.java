@@ -1,5 +1,7 @@
 import io.reactivex.rxjava3.core.Observable;
-import javafx.scene.control.Label;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import javafx.scene.control.*;
+import javafx.scene.layout.TilePane;
 import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,23 +18,43 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+import org.pdfsam.rxjavafx.observables.JavaFxObservable;
+import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class WeatherFeature {
 
-    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
+    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
     private static String uriGetGeo = "https://freegeoip.app/json/";
     public Label weatherObjLabel = new Label();
     public ImageView imageView = new ImageView();
     public Label countryName = new Label();
 
-    static CompletableFuture<Weather> queryWeather(String weatherURI, String latitude, String longitude) {
+    // create a label
+    Label label1 = new Label("This is a ContextMenu example ");
+    // create a menu
+    ContextMenu contextMenu = new ContextMenu();
+    // create menuitems
+    MenuItem menuItem1 = new MenuItem("Luxembourg");
+    MenuItem menuItem2 = new MenuItem("Germany");
+    MenuItem menuItem3 = new MenuItem("France");
+    MenuItem menuItem4 = new MenuItem("Netherlands");
+    // create a tilepane
+    TilePane tilePane = new TilePane(label1);
+
+    Menu menu = new Menu("Menu countries");
+    MenuBar menuBar = new MenuBar();
+
+    static CompletableFuture<Weather> queryWeather(String weatherURI, String countryName) {
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(weatherURI, latitude, longitude))).build();
+        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(weatherURI, countryName))).build();
 
         CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
@@ -56,48 +78,74 @@ public class WeatherFeature {
         return response;
     }
 
-    static CompletableFuture<Pair<String, ArrayList<String>>> queryGeoIP(String uriGetLongLat) {
+    static CompletableFuture<String> queryGeoIP(String uriGetLongLat) {
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
         HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(uriGetLongLat)).build();
-        CompletableFuture<Pair<String, ArrayList<String>>> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+        CompletableFuture<String> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
                     try {
                         JSONObject json = new JSONObject(resp.body());
-                        String latitude = json.getString("latitude");
-                        String longitude = json.getString("longitude");
+                      //  String latitude = json.getString("latitude");
+                      //  String longitude = json.getString("longitude");
                         String countryName = json.getString("country_name");
 
-                        ArrayList<String> geoIP = new ArrayList<>();
+                      /*  ArrayList<String> geoIP = new ArrayList<>();
                         geoIP.add(latitude);
-                        geoIP.add(longitude);
+                        geoIP.add(longitude);   */
 
-                        Pair<String, ArrayList<String>> geoInfo = new Pair<>(countryName, geoIP);
-
-                        return geoInfo;
+                       // Pair<String, ArrayList<String>> geoInfo = new Pair<>(countryName, geoIP);
+                        return countryName;
                     } catch (Exception e) { e.printStackTrace(); }
                     return null;
                 });
         return response;
     }
 
-    public WeatherFeature(){
-        Observable<Pair<String, ArrayList<String>>> geoObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+    public WeatherFeature() throws ExecutionException, InterruptedException {
 
-        Observable<Weather> currentWeather = geoObservable
-                .flatMap(geoIP -> Observable.fromFuture(queryWeather(getWeatherURI, geoIP.getValue().get(0), geoIP.getValue().get(1)))); //format with latitude and longitude
+        countryName.setText(queryGeoIP(uriGetGeo).get());
+
+        // add menu items to menu
+        contextMenu.getItems().addAll(menuItem1, menuItem2, menuItem3, menuItem4);
+        // setContextMenu to label
+        label1.setContextMenu(contextMenu);
+       // MenuBar menuBar = new MenuBar();
+        //menuBar.getMenus().add(contextMenu);
 
 
-        Observable<Pair<String, Weather>> weatherAndCityObs = Observable
-                .combineLatest(currentWeather, geoObservable, (weatherObject, geoData) ->{
+        MenuItem menuItem1 = new MenuItem("Germany");
+        MenuItem menuItem2 = new MenuItem("Luxembourg");
 
-                    return new Pair<>(geoData.getKey(), weatherObject); //countryName and weather data
+        menu.getItems().add(menuItem1);
+        menu.getItems().add(menuItem2);
+
+        menuBar.getMenus().add(menu);
+
+        Observable<String> countryObservable = JavaFxObservable.actionEventsOf(contextMenu)
+                .subscribeOn(Schedulers.computation()) // Switching thread
+                .map(ae -> {
+                   System.out.println(ae);
+                   return ae.toString();
+                });//((MenuItem)ae.getTarget()).getText());
+
+
+      //  Observable<String> countryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+
+        Observable<Weather> currentWeather = countryObservable
+                .flatMap(country -> Observable.fromFuture(queryWeather(getWeatherURI, country))); //format with countryName
+
+
+        Observable<Pair<String, Weather>> weatherAndCountryObs = Observable
+                .combineLatest(currentWeather, countryObservable, (weatherObject, country) ->{
+
+                    return new Pair<>(country, weatherObject); //countryName and weather data
                 });
 
-        weatherAndCityObs
+        weatherAndCountryObs
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(p -> {
 
@@ -115,7 +163,6 @@ public class WeatherFeature {
                     Image png = new Image(imageSource, 100, 100, false, false);
                     imageView.setImage(png);
                 });
-
 
     }
 

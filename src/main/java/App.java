@@ -11,9 +11,11 @@ import javafx.stage.Stage;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 
+import java.util.concurrent.ExecutionException;
+
 public class App extends Application {
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws ExecutionException, InterruptedException {
         stage.setTitle("Team Abandoned Dashboard");
         stage.setWidth(1500);
         stage.setHeight(750);
@@ -57,7 +59,8 @@ public class App extends Application {
         HBox weatherBox = new HBox(new Label("Weather Box"),
                 weatherFeature.countryName,
                 weatherFeature.weatherObjLabel,
-                weatherFeature.imageView
+                weatherFeature.imageView,
+                weatherFeature.menuBar
         );
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
