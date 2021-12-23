@@ -142,10 +142,17 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         CryptoFeature cryptoFeature = new CryptoFeature();
+
         Label cryptoTitle = new Label("Cryptocurrencies!");
+        cryptoTitle.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #e9ff4b;");
         HBox crypto = new HBox(
                 cryptoTitle,
-                cryptoFeature.cryptoText
+                cryptoFeature.imageView,
+                cryptoFeature.idLabel,
+                cryptoFeature.nameLabel,
+                cryptoFeature.priceLabel,
+                cryptoFeature.updateLabel,
+                cryptoFeature.trendLabel
         );
 
         /* ------------------------------------------------------------------------------------------------------ */

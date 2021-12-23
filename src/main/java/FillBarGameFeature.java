@@ -62,7 +62,7 @@ public class FillBarGameFeature {
 
         // JavaFxObservable to sum the amount of times that the user has clicked the 'fillButton'
         Observable<Integer> fillBarClicks =  JavaFxObservable.actionEventsOf(fillButton)
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.computation())  // Computation, since we sum the click action events
                 .map(accClicks -> 1)
                 .scan(0,Integer::sum);  // Sum clicks, with initial value = 0
 

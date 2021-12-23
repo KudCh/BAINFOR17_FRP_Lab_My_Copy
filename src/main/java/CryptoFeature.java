@@ -2,6 +2,9 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
 
@@ -14,8 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class CryptoFeature {
-    public Label cryptoText = new Label();
-    public String[] cryptoCurrencies = {"DOGE","BTC","ETH"};
+    public String[] cryptoCurrencies = {"DOGE","BTC","ETH","BNB"};    // List with well known cryptocurrencies
+    public ImageView imageView = new ImageView();
+    public Label priceLabel = new Label();
+    public Label idLabel = new Label();
+    public Label nameLabel = new Label();
+    public Label updateLabel = new Label();
+    public Label trendLabel = new Label();
 
     // method to fetch fresh data for the given cryptocurrency
     static CompletableFuture<String> getCrypto(String someCrypto){
@@ -36,10 +44,13 @@ public class CryptoFeature {
     }
 
     // Observable with time-interval
-    // Rotate the three cryptocurrencies in list every 5 seconds
-    public CryptoFeature(){
+    // Rotate the three cryptocurrencies in list every couple of seconds
+    CryptoFeature(){
+        // CSS for 'imageview'
+        imageView.setStyle("-fx-effect: dropshadow(three-pass-box, #000000, 25, 0, 0, 0);");
+
         Observable<String> availableCryptos = Observable
-                .interval(0,5, TimeUnit.SECONDS)
+                .interval(0,10, TimeUnit.SECONDS)
                 .map(Long::intValue)
                 .map(i -> cryptoCurrencies[i % cryptoCurrencies.length]);
 
@@ -51,13 +62,34 @@ public class CryptoFeature {
         Disposable disposable = cryptoObservable
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(cryptoObject-> {
-                    // todo: try catch
-                    JSONObject json = new JSONObject(cryptoObject).getJSONObject("asset");
-                    String name = json.getString("name");
-                    String price = json.getString("price");
-                    String update = json.getString("updated_at");
-                    String trendLastHour = json.getString("change_1h");
-                    cryptoText.setText(name+" "+price+" "+update+" "+trendLastHour);
+                    try {
+                        JSONObject json = new JSONObject(cryptoObject).getJSONObject("asset");
+                        String id = json.getString("asset_id");
+                        idLabel.setText(id);
+
+                        String name = json.getString("name");
+                        nameLabel.setText(name);
+
+                        double price = json.getDouble("price");
+                        priceLabel.setText(String.valueOf(price));
+
+                        String update = json.getString("updated_at");
+                        updateLabel.setText(update);
+
+                        double trendLastHour = json.getDouble("change_1h");
+                        trendLabel.setText(String.valueOf(trendLastHour));
+
+                        // Images from local source are read and displayed depending on whether the cryptocurrency trend is upwards or downwards.
+                        if (trendLastHour >= 0.0) {
+                            imageView.setImage(new Image("file:CryptoJPGs/good_stonks.jpg",300,225,false,true));
+                        }
+                        else {
+                            imageView.setImage(new Image("file:CryptoJPGs/bad_stonks.jpg" ,300,225,false,true));
+                        }
+                    }
+                    catch (JSONException e) {
+                        System.err.println("Exception occurred when marshalling JSON: "+e);
+                    }
                 });
 
         /* add disposables */
