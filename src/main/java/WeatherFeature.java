@@ -87,27 +87,6 @@ public class WeatherFeature {
     public WeatherFeature(){
         Observable<Pair<String, ArrayList<String>>> geoObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
 
-    /*    Observable<String> countryObservable = geoObservable
-              //  .flatMap(Pair<String, ArrayList<String>>::getKey);
-                .flatMap(pair -> pair.getKey());
-
-        Observable<ArrayList<String>> ipObservable = geoObservable
-               // .flatMap(Pair<String, ArrayList<String>>::getValue);
-                .flatMap(geoPair -> geoPair.getValue());
-*/
-        /* Hello Professor, I'd like to ask you a question about an issue in my code.
-        I have an observable pair and I want to create two separate observables from its key and its value.
-        I tried to use flatMap() to create the observables, but the returned types are Object instead of the types K, V of a Pair<K, V>.
-        Can you please give me an advice how to change that?
-
-
-        could you please let me know what I am missing here?
-        answer a question about an error in the code?
-
-         */
-
-
-
         Observable<Weather> currentWeather = geoObservable
                 .flatMap(geoIP -> Observable.fromFuture(queryWeather(getWeatherURI, geoIP.getValue().get(0), geoIP.getValue().get(1)))); //format with latitude and longitude
 
