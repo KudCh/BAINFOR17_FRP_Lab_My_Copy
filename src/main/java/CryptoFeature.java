@@ -17,7 +17,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CryptoFeature {
     public ArrayList<String> cryptoCurrenciesList = new ArrayList<>();
-    public TextField textField = new TextField("Enter ID to display!");
+    public TextField textField = new TextField("Try entering 'DOGE' into the text-field.");
     public ImageView imageView = new ImageView();
     public Label priceLabel = new Label();
     public Label idLabel = new Label();
@@ -70,7 +75,7 @@ public class CryptoFeature {
         // Rotate the three cryptocurrencies in list every couple of seconds
         ObservableList<String> fxCollection = FXCollections.observableArrayList(cryptoCurrenciesList);
         fxCollection.addListener((ListChangeListener<String>) change -> {
-            StringBuilder res = new StringBuilder("Input added to list! Current list: \n ");
+            StringBuilder res = new StringBuilder("Input added to list!\nCurrent list: \n");
             for (String s : fxCollection) res.append(s).append("\n");
             infoLabel.setText(res.toString());
         });
@@ -101,19 +106,21 @@ public class CryptoFeature {
                     try {
                         JSONObject json = new JSONObject(cryptoObject).getJSONObject("asset");
                         String id = json.getString("asset_id");
-                        idLabel.setText(id);
+                        idLabel.setText("Crypto ID: "+id);
 
                         String name = json.getString("name");
-                        nameLabel.setText(name);
+                        nameLabel.setText("Name: "+name);
 
                         double price = json.getDouble("price");
-                        priceLabel.setText(String.valueOf(price));
+                        priceLabel.setText("Current price: "+price);
 
                         String update = json.getString("updated_at");
-                        updateLabel.setText(update);
+                        String date = update.substring(0,10);
+                        String time = update.substring(11,19);
+                        updateLabel.setText("Last update was: "+date+" "+time);
 
                         double trendLastHour = json.getDouble("change_1h");
-                        trendLabel.setText(String.valueOf(trendLastHour));
+                        trendLabel.setText("Price trend in last hour: "+trendLastHour);
 
                         // Images from local source are read and displayed depending on whether the cryptocurrency trend is upwards or downwards.
                         if (trendLastHour >= 0.0) {
@@ -124,7 +131,7 @@ public class CryptoFeature {
                         }
                     }
                     catch (JSONException e) {
-                        System.err.println("Exception occurred when marshalling JSON: "+e);
+                        e.printStackTrace();
                     }
                 });
 

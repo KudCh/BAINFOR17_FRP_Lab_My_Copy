@@ -19,9 +19,10 @@ public class App extends Application {
         stage.setMaximized(true);
 
         // Container will contain all features of the dashboard
-        VBox container = new VBox(new Label());
+        VBox container = new VBox();
         container.setStyle("-fx-background-color:#6e6969;");
-        container.setSpacing(30);   // Contents of Container are less cramped together
+        container.setSpacing(20);   // Contents of Container are less cramped together
+        container.setPadding(new Insets(20));
 
         /* ------------------------------------------------------------------------------------------------------ */
 
@@ -35,7 +36,7 @@ public class App extends Application {
         clockLabel.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #2a52c9;");
         clockBox.setMaxWidth(400);
         clockBox.setSpacing(20);
-        clockBox.setPadding(new Insets(20));
+        clockBox.setPadding(new Insets(10));
         clockBox.setStyle("-fx-background-color:#ffffff;");
         clockBox.setBorder(
                 new Border(
@@ -58,13 +59,13 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         WeatherFeature weatherFeature = new WeatherFeature();
-        HBox weatherBox = new HBox(new Label("Weather Box"),
+        VBox weatherBox = new VBox(new Label("Weather Box"),
                 weatherFeature.countryName,
                 weatherFeature.weatherObjLabel,
                 weatherFeature.imageView,
                 weatherFeature.menuBar
         );
-        weatherBox.setTranslateX(10);
+        weatherBox.setPrefSize(700,450);
         weatherBox.setSpacing(20);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
@@ -89,7 +90,7 @@ public class App extends Application {
 
         FillBarGameFeature fillBarGameFeature = new FillBarGameFeature();
         Label gameLabel = new Label("Fill the Bar game!");
-        gameLabel.setStyle("-fx-font-size: 40;"+"-fx-text-fill: #b3c6ff;");
+        gameLabel.setStyle("-fx-font-size: 25;"+"-fx-text-fill: #b3c6ff;");
         HBox gameHBox0 = new HBox(
                 gameLabel
         );
@@ -99,27 +100,26 @@ public class App extends Application {
         fillBarGameFeature.textLabel.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #b3c6ff;");
 
         HBox gameHBox2 = new HBox(
-                fillBarGameFeature.difficultyMenuBar,
                 fillBarGameFeature.fillButton,
-                fillBarGameFeature.restartButton
+                fillBarGameFeature.restartButton,
+                fillBarGameFeature.difficultyMenuBar
         );
-        gameHBox2.setSpacing(25);
+        gameHBox2.setSpacing(20);
 
         HBox gameHBox3 = new HBox(
                 fillBarGameFeature.bar,
                 fillBarGameFeature.rectangle
         );
-        gameHBox3.setSpacing(25);
+        gameHBox3.setSpacing(20);
 
         gameHBox0.setAlignment(Pos.BOTTOM_CENTER);
         gameHBox1.setAlignment(Pos.BOTTOM_CENTER);
         gameHBox2.setAlignment(Pos.BOTTOM_CENTER);
         gameHBox3.setAlignment(Pos.BOTTOM_CENTER);
         VBox gameVBox = new VBox(gameHBox0,gameHBox1,gameHBox2,gameHBox3);
-
-        gameVBox.setMaxWidth(750);
-        gameVBox.setSpacing(20);
-        gameVBox.setPadding(new Insets(20));
+        gameVBox.setMaxSize(600,300);
+        gameVBox.setSpacing(15);
+        gameVBox.setPadding(new Insets(10));
         gameVBox.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
         gameVBox.setBorder(
                 new Border(
@@ -142,26 +142,71 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         CryptoFeature cryptoFeature = new CryptoFeature();
+        cryptoFeature.idLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        cryptoFeature.nameLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        cryptoFeature.priceLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        cryptoFeature.trendLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        cryptoFeature.trendLabel.setWrapText(true);
+        cryptoFeature.updateLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        cryptoFeature.infoLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
 
         Label cryptoTitle = new Label("Cryptocurrencies!");
-        cryptoTitle.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #e9ff4b;");
-        HBox crypto = new HBox(
-                cryptoTitle,
-                cryptoFeature.imageView,
-                cryptoFeature.textField,
+        cryptoTitle.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #0a0a0a;");
+        HBox cryptoBoxUpper = new HBox(cryptoTitle);
+        cryptoBoxUpper.setAlignment(Pos.TOP_CENTER);
+
+        VBox cryptoBoxLeft = new VBox(
                 cryptoFeature.idLabel,
                 cryptoFeature.nameLabel,
                 cryptoFeature.priceLabel,
-                cryptoFeature.updateLabel,
                 cryptoFeature.trendLabel,
+                cryptoFeature.updateLabel,
                 cryptoFeature.infoLabel
         );
-        crypto.setSpacing(20);
+        cryptoBoxLeft.setSpacing(20);
+        cryptoBoxLeft.setAlignment(Pos.CENTER_LEFT);
+
+        VBox cryptoBoxRight = new VBox(
+                cryptoFeature.imageView,
+                cryptoFeature.textField
+        );
+        cryptoBoxRight.setSpacing(20);
+        cryptoBoxRight.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox cryptoBoxMiddle = new HBox(cryptoBoxLeft,cryptoBoxRight);
+        cryptoBoxMiddle.setSpacing(60);
+        cryptoBoxMiddle.setPadding(new Insets(20));
+
+        VBox cryptoVBox = new VBox(cryptoBoxUpper,cryptoBoxMiddle);
+        cryptoVBox.setPrefSize(700,450);
+        cryptoVBox.setSpacing(20);
+        cryptoVBox.setStyle("-fx-background-color:#307f9a;-fx-background-radius: 10px;");
+        cryptoVBox.setBorder(
+                new Border(
+                        new BorderStroke(
+                                Color.BLACK,
+                                new BorderStrokeStyle(
+                                        StrokeType.INSIDE,
+                                        StrokeLineJoin.MITER,
+                                        StrokeLineCap.BUTT,
+                                        5,
+                                        0,
+                                        null
+                                ),
+                                new CornerRadii(10),
+                                new BorderWidths(2)
+                        )
+                )
+        );
 
         /* ------------------------------------------------------------------------------------------------------ */
 
+        HBox middleBox = new HBox(weatherBox,cryptoVBox);
+        middleBox.setAlignment(Pos.CENTER);
+        middleBox.setSpacing(120);
+
         container.setAlignment(Pos.TOP_CENTER);
-        container.getChildren().addAll(clockBox, weatherBox, crypto, gameVBox);
+        container.getChildren().addAll(clockBox, middleBox, gameVBox);
         Scene scene = new Scene(container);
         stage.setScene(scene);
         stage.show();
