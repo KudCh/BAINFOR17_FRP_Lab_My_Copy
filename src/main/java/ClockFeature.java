@@ -17,14 +17,20 @@ public class ClockFeature {
         /* Observable gives the current time every 200 ms */
         Observable<Long> digitalClock = Observable.interval(200, TimeUnit.MILLISECONDS);
         /* Observable gives the current day every minute */
-        Observable<Long> digitalDate = Observable.interval(1, TimeUnit.MINUTES);
+        Observable<Long> digitalDate = Observable.interval(0,1, TimeUnit.MINUTES);
 
+        // CSS
         digitalClockLabel.setTextFill(Color.rgb(166, 50, 248));
+        digitalClockLabel.setStyle("-fx-font-size: 20");
         digitalDateLabel.setTextFill(Color.rgb(166, 50, 160));
-        digitalDateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        digitalDateLabel.setStyle("-fx-font-size: 20");
+
+
+        // Modify the UI each tick of the Observables
         Disposable disposable1 = digitalClock
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(e -> digitalClockLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
+
         Disposable disposable2 = digitalDate
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(e -> digitalDateLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))));
@@ -32,6 +38,5 @@ public class ClockFeature {
         /* add & dispose of disposables */
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         compositeDisposable.addAll(disposable1,disposable2);
-//        compositeDisposable.dispose();
     }
 }
