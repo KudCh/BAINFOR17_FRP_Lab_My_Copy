@@ -58,14 +58,16 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         WeatherFeature weatherFeature = new WeatherFeature();
-        Label weatherLabel = new Label("Weather Feature:");
-        FlowPane weatherBox = new FlowPane(
-                weatherLabel,
-                weatherFeature.weatherObjLabel
+        HBox weatherBox = new HBox(new Label("Weather Box"),
+                weatherFeature.countryName,
+                weatherFeature.weatherObjLabel,
+                weatherFeature.imageView,
+                weatherFeature.menuBar
         );
-        weatherBox.setHgap(20);
-        weatherBox.setMaxWidth(420);
-        weatherBox.setMinHeight(75);
+        weatherBox.setTranslateX(10);
+        weatherBox.setSpacing(20);
+//        weatherBox.setMaxWidth(420);
+//        weatherBox.setMinHeight(75);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
                 new Border(
@@ -148,6 +150,7 @@ public class App extends Application {
         HBox crypto = new HBox(
                 cryptoTitle,
                 cryptoFeature.imageView,
+                cryptoFeature.textField,
                 cryptoFeature.idLabel,
                 cryptoFeature.nameLabel,
                 cryptoFeature.priceLabel,
