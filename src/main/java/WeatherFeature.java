@@ -8,120 +8,117 @@ import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class WeatherFeature {
 
     private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
-    static String uriGetLongLat = "https://freegeoip.app/json/";
-    private static JSONObject myObj;
+    private static String uriGetGeo = "https://freegeoip.app/json/";
     public Label weatherObjLabel = new Label();
+    public ImageView imageView = new ImageView();
+    public Label countryName = new Label();
 
-
-    static CompletableFuture<Pair<String, String>> queryWeather(String cityName) {
-
-        String geoURI = uriGetLongLat;
-        HttpClient httpClient = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_2)
-                .connectTimeout(Duration.ofSeconds(5))
-                .build();
-        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(geoURI))).build();
-
-        CompletableFuture<Pair<String, String>> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
-                .thenAcceptAsync(resp -> {
-                    try {
-                        JSONObject jsonObject = new JSONObject(resp.body());
-                        String latitude = jsonObject.getString("latitude");
-                        String longitude = jsonObject.getString("longitude");
-
-                        Pair geoPair = new Pair(latitude, longitude);
-                        return CompletableFuture.completedFuture(geoPair);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .join();
-        return response;
-    }
-
-    static Weather queryWeather(String cityName) {
-
-        String URIGetWeather = String.format(getWeatherURI, cityName);
+    static CompletableFuture<Weather> queryWeather(String weatherURI, String latitude, String longitude) {
 
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
-        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(URIGetWeather))).build();
+        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(String.format(weatherURI, latitude, longitude))).build();
 
-        //CompletableFuture<HttpResponse<String>>
-        Weather response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+        CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
                     try {
-                        myObj = new JSONObject(resp.body());
+                        JSONObject myObj = new JSONObject(resp.body());
                         JSONArray arr = myObj.getJSONArray("weather");
                         JSONObject data1 = arr.getJSONObject(0);
-                        String weatherD = data1.getString("description");
+                        String weather = data1.getString("description");
                         String iconID = data1.getString("icon");
 
                         JSONObject data2 = myObj.getJSONObject("main");
                         Integer temperature = data2.getInt("temp");
 
-                        Weather weatherObjj = new Weather(weatherD,temperature, iconID);
+                        Weather weatherObjj = new Weather(weather,temperature, iconID);
 
                         return weatherObjj;
 
                     } catch (JSONException e) { e.printStackTrace(); }
                     return null;
-                })
-                .join();
+                });
         return response;
     }
 
-    ImageView imageView = new ImageView();
-    Label cityName = new Label();
+    static CompletableFuture<Pair<String, ArrayList<String>>> queryGeoIP(String uriGetLongLat) {
+
+        HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_2)
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+        HttpRequest myReq = HttpRequest.newBuilder().uri(URI.create(uriGetLongLat)).build();
+        CompletableFuture<Pair<String, ArrayList<String>>> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
+                .thenApplyAsync(resp ->{
+                    try {
+                        JSONObject json = new JSONObject(resp.body());
+                        String latitude = json.getString("latitude");
+                        String longitude = json.getString("longitude");
+                        String countryName = json.getString("country_name");
+
+                        ArrayList<String> geoIP = new ArrayList<>();
+                        geoIP.add(latitude);
+                        geoIP.add(longitude);
+
+                        Pair<String, ArrayList<String>> geoInfo = new Pair<>(countryName, geoIP);
+
+                        return geoInfo;
+                    } catch (Exception e) { e.printStackTrace(); }
+                    return null;
+                });
+        return response;
+    }
 
     public WeatherFeature(){
-        final String[] cities = {"Luxembourg", "Berlin","New+York"};
-        Observable<String> cityObservable = Observable
-                .interval(0, 10, TimeUnit.SECONDS)
-                .map(Long::intValue)
-                .map(i -> cities[i % cities.length]);
+        Observable<Pair<String, ArrayList<String>>> geoObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+
+        Observable<String> countryObservable = geoObservable
+                //.flatMap(Pair<String, ArrayList<String>>::getKey)
+                .flatMap(pair -> pair.getKey());
+
+        Observable<ArrayList<String>> ipObservable = geoObservable
+               // .flatMap(Pair<String, ArrayList<String>>::getValue);
+                .flatMap(pair -> pair.getValue());
+
+        Observable<Weather> currentWeather = ipObservable
+                .flatMap(geoIP -> Observable.fromFuture(queryWeather(getWeatherURI, geoIP.get(0), geoIP.get(1))));
 
 
+        Observable<Pair<String, Weather>> weatherAndCityObs = Observable
+                .combineLatest(currentWeather, countryObservable, (weatherObject, countryName) ->{
 
-        Observable<Weather> currentWeather = cityObservable
-                .flatMap(cityName -> Observable.fromFuture(queryWeather(cityName)));
-
-
-        Observable<Pair<Weather,String>> wetherAndCityObs = Observable
-                .combineLatest(currentWeather, cityObservable, (wObj, city) ->{
-
-                    return new Pair<>(wObj,city);
+                    return new Pair<>(countryName, weatherObject);
                 });
-        wetherAndCityObs
+
+        weatherAndCityObs
                 .observeOn(JavaFxScheduler.platform())
                 .subscribe(p -> {
 
-                    Weather wObj = p.getKey();
-                    String city = p.getValue();
+                    String country = p.getKey();
+                    Weather weatherObject = p.getValue();
 
-                    String descr = wObj.weather;
-                    String temp = String.valueOf(wObj.temp);
+                    String description = weatherObject.weather;
+                    String temp = String.valueOf(weatherObject.temp);
 
-                    weatherObjLabel.setText(descr + ", " + temp + "°C");
-                    cityName.setText(city);
+                    weatherObjLabel.setText(description + ", " + temp + "°C");
+                    countryName.setText(country);
 
-                    String iconID = wObj.iconID;
+                    String iconID = weatherObject.iconID;
                     String imageSource = "http://openweathermap.org/img/wn/"+iconID+"@2x.png";
                     Image png = new Image(imageSource, 100, 100, false, false);
                     imageView.setImage(png);

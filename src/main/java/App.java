@@ -55,7 +55,7 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
         WeatherFeature weatherFeature = new WeatherFeature();
         HBox weatherBox = new HBox(new Label("Weather Box"),
-                weatherFeature.cityName,
+                weatherFeature.countryName,
                 weatherFeature.weatherObjLabel,
                 weatherFeature.imageView
         );
