@@ -66,8 +66,6 @@ public class App extends Application {
         );
         weatherBox.setTranslateX(10);
         weatherBox.setSpacing(20);
-//        weatherBox.setMaxWidth(420);
-//        weatherBox.setMinHeight(75);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
                 new Border(
@@ -155,8 +153,10 @@ public class App extends Application {
                 cryptoFeature.nameLabel,
                 cryptoFeature.priceLabel,
                 cryptoFeature.updateLabel,
-                cryptoFeature.trendLabel
+                cryptoFeature.trendLabel,
+                cryptoFeature.infoLabel
         );
+        crypto.setSpacing(20);
 
         /* ------------------------------------------------------------------------------------------------------ */
 
