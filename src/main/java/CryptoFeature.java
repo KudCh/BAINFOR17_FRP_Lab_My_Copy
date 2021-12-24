@@ -82,7 +82,7 @@ public class CryptoFeature {
 
         // Listen to user input Observable
         Disposable disposable1 = addCrypto
-                .observeOn(Schedulers.computation())
+                .observeOn(JavaFxScheduler.platform())
                 .subscribe(enteredText-> {
                     fxCollection.add(enteredText);
                     if (Objects.equals(String.valueOf(enteredText), "clear")) {

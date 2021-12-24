@@ -9,6 +9,7 @@ Reactive Programming project for BAINFOR17.
 * `src/main/java/FillBarGameFeature` contains the necessary components for a game where a user can repeatedly click a button to fill a progressbar, but the progress decays over time. 
 * `src/main/java/Weather` contains the Weather Class.
 * `src/main/java/WeatherFeature` contains the necessary components for the dashboards weather display feature.
+* `src/main/java/XPathClass` contains components needed for XML parsing.
 ### Features
 The App contains the following features:
 1. Digital clock and Date: continuously refreshed.
