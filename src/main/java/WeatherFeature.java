@@ -1,9 +1,6 @@
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.scene.control.*;
-import javafx.scene.layout.TilePane;
-import javafx.util.Pair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pdfsam.rxjavafx.schedulers.JavaFxScheduler;
@@ -16,9 +13,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+
+import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
@@ -45,20 +48,22 @@ public class WeatherFeature {
         CompletableFuture<Weather> response = httpClient.sendAsync(myReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp ->{
                     try {
-                        JSONObject myObj = new JSONObject(resp.body());
-                        JSONArray arr = myObj.getJSONArray("weather");
-                        JSONObject data1 = arr.getJSONObject(0);
-                        String weather = data1.getString("description");
-                        String iconID = data1.getString("icon");
+                        Document myXML = XPathClass.convertStringToXMLDocument(resp.body());
+                        String pathWeatherDescription = new String("/current/weather/@value");
+                        String pathIconID = new String("/current/weather/@icon");
+                        String pathTemperature = new String("/current/temperature/@value");
 
-                        JSONObject data2 = myObj.getJSONObject("main");
-                        Integer temperature = data2.getInt("temp");
+                        String weather = XPathClass.evaluateXPath(myXML, pathWeatherDescription).get(0);
+                        Float temperature = Float.valueOf(XPathClass.evaluateXPath(myXML, pathTemperature).get(0));
+                        String iconID = XPathClass.evaluateXPath(myXML, pathIconID).get(0);
 
                         Weather weatherObjj = new Weather(weather,temperature, iconID, countryName);
 
                         return weatherObjj;
 
-                    } catch (JSONException e) { e.printStackTrace(); }
+                    } catch (JSONException e) { e.printStackTrace(); } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return null;
                 });
         return response;
