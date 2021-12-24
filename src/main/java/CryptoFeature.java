@@ -1,7 +1,6 @@
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -82,7 +81,7 @@ public class CryptoFeature {
 
         // Listen to user input Observable
         Disposable disposable1 = addCrypto
-                .observeOn(Schedulers.computation())
+                .observeOn(JavaFxScheduler.platform())
                 .subscribe(enteredText-> {
                     fxCollection.add(enteredText);
                     if (Objects.equals(String.valueOf(enteredText), "clear")) {

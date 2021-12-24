@@ -20,12 +20,11 @@ public class XPathClass {
     static Document convertStringToXMLDocument(String xmlString)
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = null;
+        DocumentBuilder builder;
         try
         {
             builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
-            return doc;
+            return builder.parse(new InputSource(new StringReader(xmlString)));
         }
         catch (Exception e)
         {
@@ -34,9 +33,9 @@ public class XPathClass {
         return null;
     }
 
-    static List<String> evaluateXPath(Document document, String xpathExpression) throws Exception {
+    static List<String> evaluateXPath(Document document, String xpathExpression) {
         XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xpath = (XPath) xpathFactory.newXPath();
+        XPath xpath = xpathFactory.newXPath();
 
         List<String> values = new ArrayList<>();
         try
