@@ -1,6 +1,7 @@
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -17,12 +18,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -43,17 +39,20 @@ public class CryptoFeature {
     static CompletableFuture<String> getCrypto(String someCrypto){
         String crypto = someCrypto.toUpperCase();   // Crypto IDs must be uppercase
         String cryptoUrlBase = "https://www.cryptingup.com/api/assets/%s";
-        String URIGetCrypto = String.format(cryptoUrlBase, crypto);
+        String URIGetCrypto = String.format(cryptoUrlBase, crypto); // Combine URI
 
+        // Client
         HttpClient httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
 
+        // Request
         HttpRequest myCryptoReq = HttpRequest.newBuilder()
                 .uri(URI.create(URIGetCrypto))
                 .build();
 
+        // Send request asynchronously
         return httpClient.sendAsync(myCryptoReq, HttpResponse.BodyHandlers.ofString())
                 .thenApplyAsync(resp -> CompletableFuture.completedFuture(resp.body())).join();
     }
@@ -64,24 +63,26 @@ public class CryptoFeature {
         // CSS for 'imageview'
         imageView.setStyle("-fx-effect: dropshadow(three-pass-box, #000000, 25, 0, 0, 0);");
 
+        // Listens to text-field for user input
         Observable<String> addCrypto = JavaFxObservable.actionEventsOf(textField)
                 .map(enterWasPressed -> {
-                    String content = textField.getText();
-                    textField.clear();
+                    String content = textField.getText();   // get user input
+                    textField.clear();  // clear text-field for new input
                     return content;
                 });
 
-        // Observable with time-interval
-        // Rotate the three cryptocurrencies in list every couple of seconds
+        // FxCollection contains the cryptocurrencies that the user wants to have displayed
         ObservableList<String> fxCollection = FXCollections.observableArrayList(cryptoCurrenciesList);
+        // Attach Listener to FxCollection
         fxCollection.addListener((ListChangeListener<String>) change -> {
             StringBuilder res = new StringBuilder("Input added to list!\nCurrent list: \n");
             for (String s : fxCollection) res.append(s).append("\n");
-            infoLabel.setText(res.toString());
+            infoLabel.setText(res.toString());  // InfoLabel displays to user all the currencies in collection
         });
 
+        // Listen to user input Observable
         Disposable disposable1 = addCrypto
-                .observeOn(JavaFxScheduler.platform())
+                .observeOn(Schedulers.computation())
                 .subscribe(enteredText-> {
                     fxCollection.add(enteredText);
                     if (Objects.equals(String.valueOf(enteredText), "clear")) {
@@ -90,6 +91,8 @@ public class CryptoFeature {
                     }
                 });
 
+        // Observable with time-interval
+        // Rotate the three cryptocurrencies in list every couple of seconds
         Observable<String> availableCryptos = Observable
                 .interval(0,8, TimeUnit.SECONDS)
                 .map(Long::intValue)
@@ -124,10 +127,12 @@ public class CryptoFeature {
 
                         // Images from local source are read and displayed depending on whether the cryptocurrency trend is upwards or downwards.
                         if (trendLastHour >= 0.0) {
-                            imageView.setImage(new Image("file:CryptoJPGs/good_stonks.jpg",300,225,false,true));
+                            // the last parameter for image is backgroundLoading, meaning the image is loaded asynchronously
+                            imageView.setImage(new Image("file:CryptoJPGs/good_stonks.jpg",300,225,false,true,true));
                         }
                         else {
-                            imageView.setImage(new Image("file:CryptoJPGs/bad_stonks.jpg" ,300,225,false,true));
+                            // the last parameter for image is backgroundLoading, meaning the image is loaded asynchronously
+                            imageView.setImage(new Image("file:CryptoJPGs/bad_stonks.jpg" ,300,225,false,true,true));
                         }
                     }
                     catch (JSONException e) {
