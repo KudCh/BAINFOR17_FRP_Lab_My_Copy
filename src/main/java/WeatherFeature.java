@@ -1,7 +1,5 @@
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.TilePane;
 import javafx.util.Pair;
@@ -20,30 +18,19 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
 public class WeatherFeature {
 
-    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?q=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
+    private static String getWeatherURI = "http://api.openweathermap.org/data/2.5/weather?mode=xml&q=%s&appid=45059b7910230a3382b2cddbeac472fe&units=metric";
     private static String uriGetGeo = "https://freegeoip.app/json/";
     public Label weatherObjLabel = new Label();
     public ImageView imageView = new ImageView();
     public Label countryName = new Label();
-
-    // create a label
-    Label label1 = new Label("This is a ContextMenu example ");
-
-    // create menuitems
-    MenuItem menuItem1 = new RadioMenuItem("Luxembourg");
-    MenuItem menuItem2 = new RadioMenuItem("Germany");
-    MenuItem menuItem3 = new RadioMenuItem("France");
-    MenuItem menuItem4 = new RadioMenuItem("Netherlands");
     ToggleGroup toggleGroup = new ToggleGroup();
-    // create a tilepane
-    TilePane tilePane = new TilePane(label1);
-
-    Menu menu = new Menu("Menu countries");
+    Menu menu = new Menu("Choose country");
     MenuBar menuBar = new MenuBar();
 
     static CompletableFuture<Weather> queryWeather(String weatherURI, String countryName) {
@@ -67,7 +54,7 @@ public class WeatherFeature {
                         JSONObject data2 = myObj.getJSONObject("main");
                         Integer temperature = data2.getInt("temp");
 
-                        Weather weatherObjj = new Weather(weather,temperature, iconID);
+                        Weather weatherObjj = new Weather(weather,temperature, iconID, countryName);
 
                         return weatherObjj;
 
@@ -88,15 +75,8 @@ public class WeatherFeature {
                 .thenApplyAsync(resp ->{
                     try {
                         JSONObject json = new JSONObject(resp.body());
-                        //  String latitude = json.getString("latitude");
-                        //  String longitude = json.getString("longitude");
                         String countryName = json.getString("country_name");
 
-                      /*  ArrayList<String> geoIP = new ArrayList<>();
-                        geoIP.add(latitude);
-                        geoIP.add(longitude);   */
-
-                        // Pair<String, ArrayList<String>> geoInfo = new Pair<>(countryName, geoIP);
                         return countryName;
                     } catch (Exception e) { e.printStackTrace(); }
                     return null;
@@ -115,46 +95,44 @@ public class WeatherFeature {
         ArrayList countryList = new ArrayList();
         countryList.add("Germany");
         countryList.add("Luxembourg");
+        countryList.add("France");
+        countryList.add("Belgium");
 
         RadioMenuItem menuItem1 = new RadioMenuItem("Germany");
         RadioMenuItem menuItem2 = new RadioMenuItem("Luxembourg");
+        RadioMenuItem menuItem3 = new RadioMenuItem("France");
+        RadioMenuItem menuItem4 = new RadioMenuItem("Belgium");
 
         menu.getItems().add(menuItem1);
         menu.getItems().add(menuItem2);
-        toggleGroup.getToggles().addAll(menuItem1,menuItem2);
-        menuItem1.setSelected(true);
+        menu.getItems().add(menuItem3);
+        menu.getItems().add(menuItem4);
+        toggleGroup.getToggles().addAll(menuItem1,menuItem2, menuItem3,menuItem4);
+       // menuItem1.setSelected(true);
         menuBar.getMenus().add(menu);
 
-        Observable<Object> countryObservable = JavaFxObservable.actionEventsOf(menu)
-                .subscribeOn(Schedulers.computation()) // Switching thread
+
+
+
+      //  Observable<String> countryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+
+        Observable<String> countryObservable = JavaFxObservable.actionEventsOf(menu)
+                .subscribeOn(Schedulers.computation())
                 .map(ae -> {
-                    ObservableList<MenuItem> allMenus = menu.getItems();
-                    int index = allMenus.indexOf(ae.getTarget());
-                    return countryList.get(index);
+                    MenuItem choice = (MenuItem) ae.getTarget();
+                    System.out.println(choice.getText());
+                    return choice.getText();
                 });
 
 
-        //  Observable<String> countryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
-
         Observable<Weather> currentWeather = countryObservable
-                .flatMap(country -> {
-                    return Observable.fromFuture(queryWeather(getWeatherURI, (String) country));
-                }); //format with countryName
+                .flatMap(country -> Observable.fromFuture(queryWeather(getWeatherURI, country)));
 
-
-//        Observable<Pair<String, Weather>> weatherAndCountryObs = Observable
-//                .combineLatest(currentWeather, countryObservable, (weatherObject, country) ->{
-//
-//                    return new Pair<>(country, weatherObject); //countryName and weather data
-//                });
-
-//        weatherAndCountryObs
         currentWeather
                 .observeOn(JavaFxScheduler.platform())
-                .subscribe(p -> {
+                .subscribe(weatherObject -> {
 
-                    String country = "Lux";//p.getKey();
-                    Weather weatherObject = p;//.getValue();
+                    String country = weatherObject.countryName;
 
                     String description = weatherObject.weather;
                     String temp = String.valueOf(weatherObject.temp);
@@ -167,5 +145,9 @@ public class WeatherFeature {
                     Image png = new Image(imageSource, 100, 100, false, false);
                     imageView.setImage(png);
                 });
+
+
+
+
     }
 }
