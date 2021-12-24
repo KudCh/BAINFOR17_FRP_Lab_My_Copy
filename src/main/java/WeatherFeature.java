@@ -12,9 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.w3c.dom.Document;
 
@@ -33,6 +31,12 @@ public class WeatherFeature {
     ToggleGroup toggleGroup = new ToggleGroup();
     Menu menu = new Menu("Choose location");
     MenuBar menuBar = new MenuBar();
+
+
+    RadioMenuItem menuItem1 = new RadioMenuItem("Esch-sur-Alzette");
+    RadioMenuItem menuItem2 = new RadioMenuItem("Arlon");
+    RadioMenuItem menuItem3 = new RadioMenuItem("Strasbourg");
+    RadioMenuItem menuItem4 = new RadioMenuItem("Trier");
 
     static CompletableFuture<Weather> queryWeather(String weatherURI, String countryName) {
 
@@ -112,37 +116,16 @@ public class WeatherFeature {
     }
 
     public WeatherFeature() {
-        try {
-            countryName.setText(queryGeoIP(uriGetGeo).get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        ArrayList countryList = new ArrayList();
-        countryList.add("Esch-sur-Alzette");
-        countryList.add("Arlon");
-        countryList.add("Strasbourg");
-        countryList.add("Trier");
 
-        RadioMenuItem menuItem1 = new RadioMenuItem("Esch-sur-Alzette");
-        RadioMenuItem menuItem2 = new RadioMenuItem("Arlon");
-        RadioMenuItem menuItem3 = new RadioMenuItem("Strasbourg");
-        RadioMenuItem menuItem4 = new RadioMenuItem("Trier");
+        Observable<String> localCountryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+        observingWeather(localCountryObservable, localWeatherObjLabel, localCountryName, localImageView);
 
         menu.getItems().add(menuItem1);
         menu.getItems().add(menuItem2);
         menu.getItems().add(menuItem3);
         menu.getItems().add(menuItem4);
         toggleGroup.getToggles().addAll(menuItem1,menuItem2, menuItem3,menuItem4);
-       // menuItem1.setSelected(true);
         menuBar.getMenus().add(menu);
-
-
-
-
-        Observable<String> localCountryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
-        observingWeather(localCountryObservable, localWeatherObjLabel, localCountryName, localImageView);
 
         Observable<String> externalCountryObservable = JavaFxObservable.actionEventsOf(menu)
                 .subscribeOn(Schedulers.computation())
