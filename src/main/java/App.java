@@ -13,21 +13,21 @@ import javafx.stage.Stage;
 public class App extends Application {
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Dashboard of Team Abandoned!");
+        stage.setTitle("Entertainment dashboard!");
         stage.setWidth(800);
-        stage.setHeight(400);
+        stage.setHeight(300);
         stage.setMaximized(true);
 
         // Container will contain all features of the dashboard
         VBox container = new VBox();
-        container.setStyle("-fx-background-color:#6e6969;");
+        container.setStyle("-fx-background-color:#b0c4de;");
         container.setSpacing(20);   // Contents of Container are less cramped together
         container.setPadding(new Insets(20));
 
         /* ------------------------------------------------------------------------------------------------------ */
 
         ClockFeature clockFeature = new ClockFeature(); // initialize the ClockFeature
-        Label clockLabel = new Label("Date & Clock:");
+        Label clockLabel = new Label("Welcome ");
         HBox clockBox = new HBox(
                 clockLabel,
                 clockFeature.digitalDateLabel,
@@ -59,20 +59,27 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         WeatherFeature weatherFeature = new WeatherFeature();
+        Label weatherTitle = new Label("Weather today!");
+        weatherTitle.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #0a0a0a;");
+        HBox weatherBoxUpper = new HBox(weatherTitle);
+        weatherBoxUpper.setAlignment(Pos.TOP_CENTER);
         VBox localWeatherBox = new VBox(new Label("Local Weather"),
                 weatherFeature.localCountryName,
                 weatherFeature.localWeatherObjLabel,
                 weatherFeature.localImageView
         );
-        VBox externalWeatherBox = new VBox(new Label("Other"),
+        VBox externalWeatherBox = new VBox(new Label("Neighbours"),
                 weatherFeature.countryName,
                 weatherFeature.weatherObjLabel,
                 weatherFeature.imageView,
                 weatherFeature.menuBar
         );
-        HBox weatherBox = new HBox(localWeatherBox, externalWeatherBox);
+        HBox weatherInfoBox = new HBox(localWeatherBox, externalWeatherBox);
+        weatherInfoBox.setSpacing(50);
+        VBox weatherBox = new VBox(weatherBoxUpper, weatherInfoBox);
+        weatherInfoBox.setAlignment(Pos.CENTER);
         weatherBox.setPrefSize(700,250);
-        weatherBox.setSpacing(20);
+        weatherBox.setSpacing(50);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
                 new Border(
@@ -126,11 +133,11 @@ public class App extends Application {
         gameVBox.setMaxSize(600,300);
         gameVBox.setSpacing(15);
         gameVBox.setPadding(new Insets(10));
-        gameVBox.setStyle("-fx-background-color:#505050;-fx-background-radius: 50px;");
+        gameVBox.setStyle("-fx-background-color:#778899;-fx-background-radius: 50px;");
         gameVBox.setBorder(
                 new Border(
                         new BorderStroke(
-                                Color.DARKGOLDENROD,
+                                Color.DARKSLATEGREY,
                                 new BorderStrokeStyle(
                                         StrokeType.CENTERED,
                                         StrokeLineJoin.ROUND,
