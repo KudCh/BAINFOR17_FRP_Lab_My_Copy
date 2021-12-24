@@ -59,8 +59,19 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         WeatherFeature weatherFeature = new WeatherFeature();
+
         Label weatherTitle = new Label("Weather today!");
         weatherTitle.setStyle("-fx-font-size: 20;"+"-fx-text-fill: #0a0a0a;");
+
+        Label titleLocal = new Label("Local Weather");
+        Label titleNeighbours = new Label("Neighbours");
+        weatherFeature.localCountryName.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        weatherFeature.countryName.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        weatherFeature.localWeatherObjLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        weatherFeature.weatherObjLabel.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        titleLocal.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+        titleNeighbours.setStyle("-fx-font-size: 15;"+"-fx-text-fill: #0a0a0a;");
+
         HBox weatherBoxUpper = new HBox(weatherTitle);
         weatherBoxUpper.setAlignment(Pos.TOP_CENTER);
         VBox localWeatherBox = new VBox(new Label("Local Weather"),
@@ -74,6 +85,7 @@ public class App extends Application {
                 weatherFeature.imageView,
                 weatherFeature.menuBar
         );
+
         HBox weatherInfoBox = new HBox(localWeatherBox, externalWeatherBox);
         weatherInfoBox.setSpacing(50);
         VBox weatherBox = new VBox(weatherBoxUpper, weatherInfoBox);
