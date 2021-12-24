@@ -13,15 +13,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import java.io.StringReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 import org.pdfsam.rxjavafx.observables.JavaFxObservable;
 
@@ -32,8 +27,11 @@ public class WeatherFeature {
     public Label weatherObjLabel = new Label();
     public ImageView imageView = new ImageView();
     public Label countryName = new Label();
+    public Label localWeatherObjLabel = new Label();
+    public ImageView localImageView = new ImageView();
+    public Label localCountryName = new Label();
     ToggleGroup toggleGroup = new ToggleGroup();
-    Menu menu = new Menu("Choose country");
+    Menu menu = new Menu("Choose location");
     MenuBar menuBar = new MenuBar();
 
     static CompletableFuture<Weather> queryWeather(String weatherURI, String countryName) {
@@ -89,6 +87,30 @@ public class WeatherFeature {
         return response;
     }
 
+    static void observingWeather(Observable<String> countryObs, Label weather, Label countryName, ImageView imageView){
+
+        Observable<Weather> currentWeather = countryObs
+                .flatMap(country -> Observable.fromFuture(queryWeather(getWeatherURI, country)));
+
+        currentWeather
+                .observeOn(JavaFxScheduler.platform())
+                .subscribe(weatherObject -> {
+
+                    String country = weatherObject.countryName;
+
+                    String description = weatherObject.weather;
+                    String temp = String.valueOf(weatherObject.temp);
+
+                    weather.setText(description + ", " + temp + "°C");
+                    countryName.setText(country);
+
+                    String iconID = weatherObject.iconID;
+                    String imageSource = "http://openweathermap.org/img/wn/"+iconID+"@2x.png";
+                    Image png = new Image(imageSource, 100, 100, false, false);
+                    imageView.setImage(png);
+                });
+    }
+
     public WeatherFeature() {
         try {
             countryName.setText(queryGeoIP(uriGetGeo).get());
@@ -98,15 +120,15 @@ public class WeatherFeature {
             e.printStackTrace();
         }
         ArrayList countryList = new ArrayList();
-        countryList.add("Germany");
-        countryList.add("Luxembourg");
-        countryList.add("France");
-        countryList.add("Belgium");
+        countryList.add("Esch-sur-Alzette");
+        countryList.add("Arlon");
+        countryList.add("Strasbourg");
+        countryList.add("Trier");
 
-        RadioMenuItem menuItem1 = new RadioMenuItem("Germany");
-        RadioMenuItem menuItem2 = new RadioMenuItem("Luxembourg");
-        RadioMenuItem menuItem3 = new RadioMenuItem("France");
-        RadioMenuItem menuItem4 = new RadioMenuItem("Belgium");
+        RadioMenuItem menuItem1 = new RadioMenuItem("Esch-sur-Alzette");
+        RadioMenuItem menuItem2 = new RadioMenuItem("Arlon");
+        RadioMenuItem menuItem3 = new RadioMenuItem("Strasbourg");
+        RadioMenuItem menuItem4 = new RadioMenuItem("Trier");
 
         menu.getItems().add(menuItem1);
         menu.getItems().add(menuItem2);
@@ -119,40 +141,17 @@ public class WeatherFeature {
 
 
 
-      //  Observable<String> countryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+        Observable<String> localCountryObservable = Observable.fromFuture(queryGeoIP(uriGetGeo));
+        observingWeather(localCountryObservable, localWeatherObjLabel, localCountryName, localImageView);
 
-        Observable<String> countryObservable = JavaFxObservable.actionEventsOf(menu)
+        Observable<String> externalCountryObservable = JavaFxObservable.actionEventsOf(menu)
                 .subscribeOn(Schedulers.computation())
                 .map(ae -> {
                     MenuItem choice = (MenuItem) ae.getTarget();
                     System.out.println(choice.getText());
                     return choice.getText();
                 });
-
-
-        Observable<Weather> currentWeather = countryObservable
-                .flatMap(country -> Observable.fromFuture(queryWeather(getWeatherURI, country)));
-
-        currentWeather
-                .observeOn(JavaFxScheduler.platform())
-                .subscribe(weatherObject -> {
-
-                    String country = weatherObject.countryName;
-
-                    String description = weatherObject.weather;
-                    String temp = String.valueOf(weatherObject.temp);
-
-                    weatherObjLabel.setText(description + ", " + temp + "°C");
-                    countryName.setText(country);
-
-                    String iconID = weatherObject.iconID;
-                    String imageSource = "http://openweathermap.org/img/wn/"+iconID+"@2x.png";
-                    Image png = new Image(imageSource, 100, 100, false, false);
-                    imageView.setImage(png);
-                });
-
-
-
+        observingWeather(externalCountryObservable, weatherObjLabel, countryName, imageView);
 
     }
 }

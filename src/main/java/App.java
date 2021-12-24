@@ -59,13 +59,19 @@ public class App extends Application {
         /* ------------------------------------------------------------------------------------------------------ */
 
         WeatherFeature weatherFeature = new WeatherFeature();
-        VBox weatherBox = new VBox(new Label("Weather Box"),
+        VBox localWeatherBox = new VBox(new Label("Local Weather"),
+                weatherFeature.localCountryName,
+                weatherFeature.localWeatherObjLabel,
+                weatherFeature.localImageView
+        );
+        VBox externalWeatherBox = new VBox(new Label("Other"),
                 weatherFeature.countryName,
                 weatherFeature.weatherObjLabel,
                 weatherFeature.imageView,
                 weatherFeature.menuBar
         );
-        weatherBox.setPrefSize(700,450);
+        HBox weatherBox = new HBox(localWeatherBox, externalWeatherBox);
+        weatherBox.setPrefSize(700,250);
         weatherBox.setSpacing(20);
         weatherBox.setStyle("-fx-background-color:#9dd6ea;-fx-background-radius: 10px;");
         weatherBox.setBorder(
